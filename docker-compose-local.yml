@@ -1,0 +1,12 @@
+services:
+  peerprep_mongo:
+    image: mongo:8.0.14-noble
+    restart: unless-stopped
+    container_name: "peerprep_mongo"
+    ports:
+      - "127.0.0.1:27017:27017" # bind to localhost of the host only - prevents external access
+    volumes:
+      - mongo_data:/data/db # Use a named volume called "mongo_data", and mount it to /data/db for reading by MongoDB
+
+volumes:
+  mongo_data:

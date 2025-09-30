@@ -1,0 +1,20 @@
+{
+  "name": "db_management",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "purge": "node purge.js",
+    "schema": "node schema.js",
+    "seed": "pnpm run purge && pnpm run schema && node seed.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.1",
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "mongodb": "^6.20.0"
+  },
+  "type": "module"
+}
