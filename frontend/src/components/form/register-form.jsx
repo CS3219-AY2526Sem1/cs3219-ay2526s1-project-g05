@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function RegisterForm({ className, ...props }) {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setError("");
+      setSuccess("");
+      setSubmitting(true);
+      try {
+        const response = await fetch("/api/users/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const message = data?.message || "Registration failed.";
+          setError(message);
+          return;
+        }
+        setSuccess("Account created. You can now log in.");
+        setUsername("");
+        setEmail("");
+        setPassword("");
+      } catch (err) {
+        setError("Network error. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [username, email, password]
+  );
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -20,7 +59,7 @@ export function RegisterForm({ className, ...props }) {
           </CardDescription> */}
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               {/* <div className="flex flex-col gap-4">
                 <Button variant="outline" className="w-full">
@@ -52,20 +91,51 @@ export function RegisterForm({ className, ...props }) {
               <div className="grid gap-6">
                 <div className="grid gap-3">
                   <Label htmlFor="username">Username</Label>
-                  <Input id="username" type="text" required />
+                  <Input
+                    id="username"
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={submitting}
+                  />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" required />
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={submitting}
+                  />
                 </div>
                 <div className="grid gap-3">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
                   </div>
-                  <Input id="password" type="password" required />
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={submitting}
+                  />
                 </div>
-                <Button type="submit" className="w-full">
-                  Sign Up
+                {error && (
+                  <p className="text-sm text-red-500" role="alert">
+                    {error}
+                  </p>
+                )}
+                {success && (
+                  <p className="text-sm text-green-600" role="status">
+                    {success}
+                  </p>
+                )}
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? "Signing Up..." : "Sign Up"}
                 </Button>
               </div>
 
