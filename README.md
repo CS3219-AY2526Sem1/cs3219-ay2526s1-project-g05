@@ -2,7 +2,7 @@
 
 # CS3219 Project (PeerPrep) - AY2526S1
 
-## Group: Gxx
+## Group: G05
 
 ### Note:
 
