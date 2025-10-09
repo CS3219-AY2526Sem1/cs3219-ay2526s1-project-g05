@@ -17,6 +17,11 @@ export function RegisterForm({ className, ...props }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -32,14 +37,51 @@ export function RegisterForm({ className, ...props }) {
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          const message = data?.message || "Registration failed.";
-          setError(message);
+          // Reset field errors before mapping new ones
+          setFieldErrors({ username: "", email: "", password: "" });
+
+          // Prefer specific validation errors from backend
+          if (Array.isArray(data?.errors) && data.errors.length > 0) {
+            const nextFieldErrors = { username: "", email: "", password: "" };
+            for (const msg of data.errors) {
+              const lower = String(msg).toLowerCase();
+              if (lower.includes("username")) {
+                nextFieldErrors.username = msg;
+              } else if (lower.includes("email")) {
+                nextFieldErrors.email = msg;
+              } else if (lower.includes("password")) {
+                nextFieldErrors.password = msg;
+              } else {
+                // If we cannot infer field, show it as a general error
+                setError((prev) => (prev ? `${prev} ${msg}` : String(msg)));
+              }
+            }
+            setFieldErrors(nextFieldErrors);
+            if (!error && !data?.message) {
+              setError("Please fix the highlighted fields.");
+            }
+          } else if (typeof data?.message === "string") {
+            // Handle conflict errors like: "The following fields are already taken: email, username."
+            const lower = data.message.toLowerCase();
+            const nextFieldErrors = { username: "", email: "", password: "" };
+            if (lower.includes("already taken") || lower.includes("taken")) {
+              if (lower.includes("email")) nextFieldErrors.email = "This email is already taken.";
+              if (lower.includes("username")) nextFieldErrors.username = "This username is already taken.";
+              setFieldErrors(nextFieldErrors);
+              setError("Some details are already in use. Please choose different values.");
+            } else {
+              setError(data.message || "Registration failed.");
+            }
+          } else {
+            setError("Registration failed. Please try again.");
+          }
           return;
         }
-        setSuccess("Account created. You can now log in.");
+        setSuccess("Account created! You can now log in.");
         setUsername("");
         setEmail("");
         setPassword("");
+        setFieldErrors({ username: "", email: "", password: "" });
       } catch (err) {
         setError("Network error. Please try again.");
       } finally {
@@ -99,6 +141,11 @@ export function RegisterForm({ className, ...props }) {
                     onChange={(e) => setUsername(e.target.value)}
                     disabled={submitting}
                   />
+                  {fieldErrors.username && (
+                    <p className="text-xs text-red-500" role="alert">
+                      {fieldErrors.username}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="email">Email</Label>
@@ -110,6 +157,11 @@ export function RegisterForm({ className, ...props }) {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={submitting}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-xs text-red-500" role="alert">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-3">
                   <div className="flex items-center">
@@ -123,6 +175,11 @@ export function RegisterForm({ className, ...props }) {
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={submitting}
                   />
+                  {fieldErrors.password && (
+                    <p className="text-xs text-red-500" role="alert">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
                 {error && (
                   <p className="text-sm text-red-500" role="alert">
