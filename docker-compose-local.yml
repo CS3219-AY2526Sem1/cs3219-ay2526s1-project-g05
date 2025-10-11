@@ -8,5 +8,16 @@ services:
     volumes:
       - mongo_data:/data/db # Use a named volume called "mongo_data", and mount it to /data/db for reading by MongoDB
 
+  peerprep_redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    container_name: "peerprep_redis"
+    ports:
+      - "127.0.0.1:6379:6379" # bind to localhost of the host only - prevents external access
+    volumes:
+      - redis_data:/data # Use a named volume for Redis data persistence
+    command: redis-server --appendonly yes # Enable AOF persistence for data durability
+
 volumes:
   mongo_data:
+  redis_data:
