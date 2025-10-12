@@ -63,4 +63,7 @@ export const question_schema = {
 
 export const question_indexes = [
   { key: { QID: 1 }, options: { unique: true, name: "QID_index" } },
+  { key: { topics: 1 }, options: { name: "topic_index" } },
+  { key: { difficulty: 1 }, options: { name: "difficulty_index" } },
+  { key: { title: "text" }, options: { name: "title_text_index" } },
 ];

@@ -15,14 +15,15 @@ const run = async () => {
       .listCollections({ name: collectionName })
       .toArray();
     if (collections.length > 0) {
-      console.warn(
-        `Collection "${collectionName}" already exists. Skipping creation.`,
-      );
-      continue;
+      await db.command({
+        collMod: "users",
+        validator: schema.validator,
+      });
+      console.info(`Updadted existing "${collectionName}" with new schema.`);
+    } else {
+      await db.createCollection(collectionName, schema);
+      console.info(`Collection "${collectionName}" created with schema.`);
     }
-
-    await db.createCollection(collectionName, schema);
-    console.info(`Collection "${collectionName}" created with schema.`);
 
     const collection = db.collection(collectionName);
     for (const index of question_indexes) {

@@ -10,9 +10,10 @@ export const startSwaggerDocs = (app, name, port) => {
       },
     },
     security: {
-      BasicAuth: {
+      bearerAuth: {
         type: "http",
-        scheme: "basic",
+        scheme: "bearer",
+        bearerFormat: "JWT",
       },
     },
     baseDir: process.cwd(),

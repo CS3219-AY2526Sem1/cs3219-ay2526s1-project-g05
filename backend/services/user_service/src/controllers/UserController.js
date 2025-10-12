@@ -1,4 +1,4 @@
-import { ApiError } from "../errors/ApiError.js";
+import { ApiError } from "../utils/errors/ApiError.js";
 
 export class UserController {
   constructor(userService) {
@@ -16,8 +16,8 @@ export class UserController {
 
   login = async (req, res, next) => {
     try {
-      const user = await this.userService.authenticateUser(req.body ?? {});
-      res.json({ message: "Login successful.", user });
+      const result = await this.userService.authenticateUser(req.body ?? {});
+      res.json({ message: "Login successful.", ...result });
     } catch (error) {
       next(error);
     }
@@ -34,7 +34,10 @@ export class UserController {
 
   update = async (req, res, next) => {
     try {
-      const user = await this.userService.updateUser(req.params.id, req.body ?? {});
+      const user = await this.userService.updateUser(
+        req.params.id,
+        req.body ?? {},
+      );
       res.json({ message: "User updated successfully.", user });
     } catch (error) {
       next(error);
@@ -52,9 +55,12 @@ export class UserController {
 
   requestPasswordReset = async (req, res, next) => {
     try {
-      const result = await this.userService.requestPasswordReset(req.body?.email);
+      const result = await this.userService.requestPasswordReset(
+        req.body?.email,
+      );
       const responseBody = {
-        message: "If an account exists for that email, a password reset link has been issued.",
+        message:
+          "If an account exists for that email, a password reset link has been issued.",
       };
       if (result && process.env.NODE_ENV !== "production") {
         responseBody.resetToken = result.resetToken;
@@ -68,7 +74,10 @@ export class UserController {
 
   resetPassword = async (req, res, next) => {
     try {
-      const user = await this.userService.resetPassword(req.body?.token, req.body?.password);
+      const user = await this.userService.resetPassword(
+        req.body?.token,
+        req.body?.password,
+      );
       res.json({ message: "Password reset successfully.", user });
     } catch (error) {
       next(error);

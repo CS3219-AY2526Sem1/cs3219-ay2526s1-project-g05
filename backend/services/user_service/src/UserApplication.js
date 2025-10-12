@@ -1,6 +1,6 @@
 import express from "express";
 import { MongoClientInstance } from "../../../common_scripts/mongo.js";
-import { PasswordHasher } from "./security/PasswordHasher.js";
+import { PasswordHasher } from "./utils/PasswordHasher.js";
 import { UserRepository } from "./repositories/UserRepository.js";
 import { UserService } from "./services/UserService.js";
 import {
@@ -27,14 +27,13 @@ export class UserApplication {
     const controller = new UserController(userService);
 
     const app = express();
-    app.enable("trust proxy");
     app.use(express.json());
 
     app.get("/status", (_req, res) => {
       res.json({ status: "User service is running" });
     });
 
-    app.use("/api/users", createUserRouter(controller));
+    app.use("/users", createUserRouter(controller));
 
     app.use(errorMiddleware);
 
