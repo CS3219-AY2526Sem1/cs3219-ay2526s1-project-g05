@@ -7,7 +7,9 @@ export class CollaborationController {
 
   createSession = async (req, res, next) => {
     try {
-      const session = await this.collaborationService.createSession(req.body ?? {});
+      const session = await this.collaborationService.createSession(
+        req.body ?? {},
+      );
       res.status(201).json({
         message: "Collaboration session created successfully.",
         session,
@@ -19,7 +21,9 @@ export class CollaborationController {
 
   getSession = async (req, res, next) => {
     try {
-      const session = await this.collaborationService.getSession(req.params.sessionId);
+      const session = await this.collaborationService.getSession(
+        req.params.sessionId,
+      );
       res.json({ session });
     } catch (error) {
       next(error);
@@ -28,7 +32,9 @@ export class CollaborationController {
 
   getSessionByRoomId = async (req, res, next) => {
     try {
-      const session = await this.collaborationService.getSessionByRoomId(req.params.roomId);
+      const session = await this.collaborationService.getSessionByRoomId(
+        req.params.roomId,
+      );
       res.json({ session });
     } catch (error) {
       next(error);
@@ -37,7 +43,10 @@ export class CollaborationController {
 
   joinSession = async (req, res, next) => {
     try {
-      const session = await this.collaborationService.joinSession(req.params.sessionId, req.body ?? {});
+      const session = await this.collaborationService.joinSession(
+        req.params.sessionId,
+        req.body ?? {},
+      );
       res.json({
         message: "Joined collaboration session successfully.",
         session,
@@ -49,10 +58,13 @@ export class CollaborationController {
 
   submitOperation = async (req, res, next) => {
     try {
-      const result = await this.collaborationService.recordOperation(req.params.sessionId, {
-        ...req.body,
-        userId: req.body?.userId,
-      });
+      const result = await this.collaborationService.recordOperation(
+        req.params.sessionId,
+        {
+          ...req.body,
+          userId: req.body?.userId,
+        },
+      );
       res.json({
         message: result.conflict
           ? "Operation applied with conflict resolution."
@@ -66,24 +78,12 @@ export class CollaborationController {
 
   leaveSession = async (req, res, next) => {
     try {
-      const session = await this.collaborationService.leaveSession(req.params.sessionId, req.body ?? {});
-      res.json({
-        message: "Leave request processed successfully.",
-        session,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  reconnectParticipant = async (req, res, next) => {
-    try {
-      const session = await this.collaborationService.reconnectParticipant(
+      const session = await this.collaborationService.leaveSession(
         req.params.sessionId,
-        req.body?.userId,
+        req.body ?? {},
       );
       res.json({
-        message: "Reconnected to collaboration session successfully.",
+        message: "Leave request processed successfully.",
         session,
       });
     } catch (error) {
@@ -141,7 +141,9 @@ export class CollaborationController {
       if (!req.body?.reason || req.body.reason !== "admin") {
         throw new ApiError(403, "Unauthorized to terminate session.");
       }
-      const session = await this.collaborationService.terminateSession(req.params.sessionId);
+      const session = await this.collaborationService.terminateSession(
+        req.params.sessionId,
+      );
       res.json({
         message: "Session terminated successfully.",
         session,
