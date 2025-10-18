@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import { securityHeaders } from './middleware/securityHeaders.js';
 import { errorMiddleware, MatchingController } from './controllers/MatchingController.js';
 import { createMatchingRouter } from './routes/matchingRoutes.js';
 import { MatchingService } from './services/MatchingService.js';
 import { MatchingRepository } from './repositories/MatchingRepository.js';
 import { RedisSubscriber } from './redis/RedisSubscriber.js';
+import { startSwaggerDocs } from '../../../common_scripts/swagger_docs.js';
 
 export class MatchingServiceApplication {
     constructor({ port = process.env.MATCHINGSERVICEPORT || 4003 } = {}) {
@@ -21,30 +21,30 @@ export class MatchingServiceApplication {
         const app = express();
         const repository = new MatchingRepository();
         await repository.initialize(); // Initialize Redis connection
-
+        
         const service = new MatchingService({ repository });
         const controller = new MatchingController(service);
-
+        
         // set circular dependency
         await service.setNotifier(controller);
-
+        
         // store object in the class fields to call cleanup interval
         this.service = service;
-
+        
         // periodic cleanup of stale sessions every 3 minutes
         this.cleanupInterval = setInterval(() => {
             this.service.cleanupStaleSessions().catch(err => {
                 console.error("Stale cleanup worker failed:", err);
             });
         }, 3 * 60 * 1000);
-
+        
         const redisSubscriber = new RedisSubscriber(service);
         await redisSubscriber.start();
         this.redisSubscriber = redisSubscriber;
-
+        
         app.enable('trust proxy');
         app.use(express.json());
-        app.use(securityHeaders);
+        startSwaggerDocs(app, "Matching Service API", this.port);
 
         if (process.env.NODE_ENV === 'development') {
             app.use(cors());
@@ -54,7 +54,7 @@ export class MatchingServiceApplication {
             res.json({ status: 'Matching service is running' });
         });
 
-        app.use("/api/matching", createMatchingRouter(controller));
+        app.use("/matching", createMatchingRouter(controller));
 
         app.use(errorMiddleware);
 

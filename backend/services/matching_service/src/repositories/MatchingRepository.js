@@ -3,8 +3,9 @@ import { RedisClient } from '../redis/RedisClient.js';
 export class MatchingRepository {
     constructor() {
         this.redis = null;
+        this.userQueue = {};
+
         this.QUEUE_KEY = 'matching:queue';
-        this.SESSION_PREFIX = 'matching:session:';
         this.USER_PREFIX = 'matching:user:';
 
         this.ACTIVE_LISTENERS_KEY = 'matching:active_listeners';
@@ -14,11 +15,25 @@ export class MatchingRepository {
         this.PENDING_MATCH_SESSION_KEY = 'matching:match_map:';
 
         this.QUEUE_WINDOW = 100; // Number of sessions to consider when matching
+        this.MATCH_TIMEOUT_SECONDS = 180;
     }
 
     async initialize() {
         await RedisClient.connect();
         this.redis = RedisClient.getClient();
+    }
+
+    // --- Criteria and Utility ---
+
+    topicsMatch(requiredTopics, availableTopics) {
+        if (requiredTopics.length === 0) {
+            return true;
+        }
+        if (availableTopics.length === 0) {
+            return false;
+        }
+        const availableSet = new Set(availableTopics);
+        return requiredTopics.some(topic => availableSet.has(topic));
     }
 
     meetsCriteria(criteria, otherCriteria) {
@@ -32,62 +47,54 @@ export class MatchingRepository {
             return false;
         }
 
-        // intersection of A and B
         return this.topicsMatch(criteriaTopics, otherTopics) &&
             this.topicsMatch(otherTopics, criteriaTopics);
     }
 
-    topicsMatch(requiredTopics, availableTopics) {
-        if (requiredTopics.length === 0) {
-            return true;
+    // --- User State ---
+
+    async getUserData(userId) {
+        const userData = await this.redis.hGetAll(`${this.USER_PREFIX}${userId}`);
+        if (Object.keys(userData).length === 0) {
+            return null;
         }
-        if (availableTopics.length === 0) {
-            return false;
-        }
-        const availableSet = new Set(availableTopics);
-        return requiredTopics.some(topic => availableSet.has(topic));
+        return userData;
     }
 
-    async enterQueue(user, sessionId, criteria, score = null) {
+    async userInQueue(user) {
+        return (await this.redis.exists(`${this.USER_PREFIX}${user.id}`)) === 1;
+    }
+
+    // --- Queue Management ---
+
+    async enterQueue(user, criteria, score = null) {
+        const userId = user.id; 
+
         const sessionData = {
             user: JSON.stringify(user),
             criteria: JSON.stringify(criteria),
             timestamp: Date.now().toString()
         };
 
-        const multi = this.redis.multi();
+        this.userQueue[userId] = sessionData;
 
-        multi.zAdd(this.QUEUE_KEY, {
-            score: score || Date.now(),
-            value: sessionId
-        });
-
-        multi.hSet(`${this.SESSION_PREFIX}${sessionId}`, sessionData);
-
-        // Store user to session mapping for duplicate prevention
-        multi.set(`${this.USER_PREFIX}${user.id}`, sessionId);
-
-        await multi.exec();
-        return true;
+        return userId;
     }
 
     async findMatch(criteria) {
-        // Get a batch of sessions rather than the entire list for performance
-        // TODO: handle for what if match is after the first 100
-        const sessionIds = await this.redis.zRange(this.QUEUE_KEY, 0, this.QUEUE_WINDOW);
-
-        for (const sessionId of sessionIds) {
-            if (await this.getMatchIdFromSession(sessionId)) {
+        for (const userId in this.userQueue) {
+            if (!Object.prototype.hasOwnProperty.call(this.userQueue, userId)) {
                 continue;
             }
-            const sessionData = await this.redis.hGetAll(`${this.SESSION_PREFIX}${sessionId}`);
-
+            const sessionData = this.userQueue[userId];
             const queuedCriteria = JSON.parse(sessionData.criteria);
             if (this.meetsCriteria(criteria, queuedCriteria)) {
+                delete this.userQueue[userId];
                 const user = JSON.parse(sessionData.user);
+
                 return {
                     user: user,
-                    sessionId: sessionId,
+                    userId: userId,
                     criteria: queuedCriteria
                 };
             }
@@ -95,32 +102,7 @@ export class MatchingRepository {
         return null;
     }
 
-    async getStaleSessions(timeoutMs = 300000) {
-        const now = Date.now();
-        const staleSessionIds = [];
-        const sessionIds = await this.redis.zRange(this.QUEUE_KEY, 0, -1);
-        for (const sessionId of sessionIds) {
-            const sessionTimestamp = await this.redis.hGet(`${this.SESSION_PREFIX}${sessionId}`, 'timestamp');
-            if (sessionTimestamp && (now - parseInt(sessionTimestamp, 10) > timeoutMs)) {
-                staleSessionIds.push(sessionId);
-            }
-        }
-        return staleSessionIds;
-    }
-
-    async addActiveListener(sessionId) {
-        await this.redis.hSet(this.ACTIVE_LISTENERS_KEY, sessionId, Date.now().toString());
-        return true;
-    }
-
-    async removeActiveListener(sessionId) {
-        await this.redis.hDel(this.ACTIVE_LISTENERS_KEY, sessionId);
-        return true;
-    }
-
-    async isActiveListener(sessionId) {
-        return (await this.redis.hExists(this.ACTIVE_LISTENERS_KEY, sessionId)) === 1;
-    }
+    // --- Match State management ---
 
     async getMatchIdFromSession(sessionId) {
         return await this.redis.get(`${this.PENDING_MATCH_SESSION_KEY}${sessionId}`);
@@ -136,10 +118,15 @@ export class MatchingRepository {
         return data ? JSON.parse(data) : null;
     }
 
-    async updateMatchState(matchId, matchState) {
-        // overwrites existing
-        await this.redis.set(`${this.MATCH_DATA_KEY}${matchId}`, JSON.stringify(matchState), { KEEPTTL: true });
+    async storeMatchState(matchId, matchState) {
         await this.redis.set(`${this.PERSISTENT_MATCH_DATA_KEY}${matchId}`, JSON.stringify(matchState));
+        await this.redis.set(`${this.MATCH_DATA_KEY}${matchId}`, JSON.stringify(matchState), { EX: this.MATCH_TIMEOUT_SECONDS });
+        return true;
+    }
+
+    async storePendingMatch(sessionId, matchId) {
+        const matchSessionKey = `${this.PENDING_MATCH_SESSION_KEY}${sessionId}`;
+        await this.redis.set(matchSessionKey, matchId);
         return true;
     }
 
@@ -155,28 +142,21 @@ export class MatchingRepository {
         return matchState.users[sessionId].matchDetails;
     }
 
-    async sessionExists(sessionId) {
-        const sessionData = await this.getSessionData(sessionId);
-        return Object.keys(sessionData).length > 0;
-    }
-
-    async getSessionData(sessionId) {
-        return await this.redis.hGetAll(`${this.SESSION_PREFIX}${sessionId}`);
-    }
-
-    async userInQueue(user) {
-        return (await this.redis.exists(`${this.USER_PREFIX}${user.id}`)) === 1;
-    }
-
-    async storeMatchState(matchId, matchState) {
+    async updateMatchState(matchId, matchState) {
+        // overwrites existing
+        await this.redis.set(`${this.MATCH_DATA_KEY}${matchId}`, JSON.stringify(matchState), { KEEPTTL: true });
         await this.redis.set(`${this.PERSISTENT_MATCH_DATA_KEY}${matchId}`, JSON.stringify(matchState));
-        await this.redis.set(`${this.MATCH_DATA_KEY}${matchId}`, JSON.stringify(matchState), { EX: 180 });
         return true;
     }
 
-    async storePendingMatch(sessionId, matchId) {
-        const matchSessionKey = `${this.PENDING_MATCH_SESSION_KEY}${sessionId}`;
-        await this.redis.set(matchSessionKey, matchId);
+    // --- Cleanup and Deletion ---
+
+    async deletePendingMatch(sessionId) {
+        const matchId = await this.getMatchIdFromSession(sessionId);
+        if (!matchId) {
+            return false;
+        }
+        await this.redis.del(`${this.PENDING_MATCH_SESSION_KEY}${sessionId}`);
         return true;
     }
 
@@ -207,5 +187,36 @@ export class MatchingRepository {
 
         await multi.exec();
         return true;
+    }
+
+    // --- Active Listener Management ---
+
+    async addActiveListener(sessionId) {
+        await this.redis.hSet(this.ACTIVE_LISTENERS_KEY, sessionId, Date.now().toString());
+        return true;
+    }
+
+    async removeActiveListener(sessionId) {
+        await this.redis.hDel(this.ACTIVE_LISTENERS_KEY, sessionId);
+        return true;
+    }
+
+    async isActiveListener(sessionId) {
+        return (await this.redis.hExists(this.ACTIVE_LISTENERS_KEY, sessionId)) === 1;
+    }
+
+    // --- Stale Session Management ---
+
+    async getStaleSessions(timeoutMs = 300000) {
+        const now = Date.now();
+        const staleSessionIds = [];
+        const sessionIds = await this.redis.zRange(this.QUEUE_KEY, 0, -1);
+        for (const sessionId of sessionIds) {
+            const sessionTimestamp = await this.redis.hGet(`${this.SESSION_PREFIX}${sessionId}`, 'timestamp');
+            if (sessionTimestamp && (now - parseInt(sessionTimestamp, 10) > timeoutMs)) {
+                staleSessionIds.push(sessionId);
+            }
+        }
+        return staleSessionIds;
     }
 };

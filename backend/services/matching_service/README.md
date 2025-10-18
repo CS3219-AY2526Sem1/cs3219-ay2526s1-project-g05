@@ -22,7 +22,7 @@ The service listens on port `4003` by default. 【F:backend/services/matching_se
 
 ### Join queue as user with question criteria set to hard
 ```bash
-curl -X POST http://localhost:4003/api/matching/queue \
+curl -X POST http://localhost:4003/matching/queue \
   -H "Content-Type: application/json" \
   -d '{
     "user": { "name": "pauline", "id": "1" },
@@ -32,12 +32,12 @@ curl -X POST http://localhost:4003/api/matching/queue \
 
 ### Get match status for queued user
 ```bash
-curl http://localhost:4003/api/matching/status/session-1-c7932e53-2e21-47ac-8c94-7fa78a118a41
+curl http://localhost:4003/matching/status/session-1-c7932e53-2e21-47ac-8c94-7fa78a118a41
 ```
 
 ### Confirm match for a matched user
 ```bash
-curl -X POST http://localhost:4003/api/matching/confirm \
+curl -X POST http://localhost:4003/matching/confirm \
   -H "Content-Type: application/json" \
   -d '{
     "sessionId": "session-1-c7932e53-2e21-47ac-8c94-7fa78a118a41"
@@ -46,7 +46,7 @@ curl -X POST http://localhost:4003/api/matching/confirm \
 
 ### Cancel match for a queued user
 ```bash
-curl -X POST http://localhost:4003/api/matching/cancel \
+curl -X POST http://localhost:4003/matching/cancel \
   -H "Content-Type: application/json" \
   -d '{
     "sessionId": "session-1-c7932e53-2e21-47ac-8c94-7fa78a118a41"
