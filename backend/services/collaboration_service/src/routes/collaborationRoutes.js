@@ -28,15 +28,6 @@ export const createCollaborationRouter = (controller) => {
   router.post("/sessions/:sessionId/leave", controller.leaveSession);
 
   /**
-   * POST /sessions/:sessionId/reconnect
-   * @summary Reconnect a participant that temporarily disconnected
-   */
-  router.post(
-    "/sessions/:sessionId/reconnect",
-    controller.reconnectParticipant,
-  );
-
-  /**
    * POST /sessions/:sessionId/question/propose
    * @summary Propose a new question for the collaboration session
    */
