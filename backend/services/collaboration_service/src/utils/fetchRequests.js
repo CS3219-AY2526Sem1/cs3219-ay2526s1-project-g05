@@ -1,3 +1,5 @@
+import { ApiError } from "../errors/ApiError.js";
+
 export const fetchUser = async (userId) => {
   const result = await fetch(
     `http://localhost:${process.env.USERSERVICEPORT}/users/${userId}`,

@@ -170,7 +170,7 @@ export class CollaborationSessionValidator {
     if (!sessionId) {
       errors.push({ field: "sessionId", message: "sessionId is required." });
     } else {
-      normalized.sessionId = usersessionIdId;
+      normalized.sessionId = sessionId;
     }
 
     const reason = this.normalizeString(payload.reason);

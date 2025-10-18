@@ -62,7 +62,7 @@ export class CollaborationSessionService {
 
   async generateUniqueRoomId() {
     while (true) {
-      const candidate = await this.crypto.randomBytes(3).toString("hex")();
+      const candidate = await this.crypto.randomBytes(3).toString("hex");
       const existing = await this.repository.findByRoomId(candidate);
       if (!existing) {
         return candidate;
