@@ -1,4 +1,5 @@
 import { ApiError } from "../errors/ApiError.js";
+import { verify_token_user } from "../../../../common_scripts/authentication_middleware.js";
 
 export class CollaborationSocketManager {
   constructor({ collaborationService, logger = console } = {}) {
@@ -9,8 +10,23 @@ export class CollaborationSocketManager {
 
   bind(io) {
     this.io = io;
+    io.use(async (socket, next) => {
+      // Handle authentication
+      const token = socket.handshake.auth.token;
+      const result = await verify_token_user(token);
+
+      if (!result.success) {
+        return next(new Error("Authentication error: " + result.error));
+      }
+
+      socket.data.user = result.decoded;
+      next();
+    });
+
     io.on("connection", (socket) => {
-      this.logger.info?.("Collaboration socket connected", { socketId: socket.id });
+      this.logger.info?.("Collaboration socket connected", {
+        socketId: socket.id,
+      });
       this.configureSocket(socket);
     });
   }
@@ -18,15 +34,15 @@ export class CollaborationSocketManager {
   configureSocket(socket) {
     socket.on("session:join", async (payload = {}, callback) => {
       await this.handleAction(socket, payload, callback, async () => {
-        const { sessionId, userId, username } = payload;
-        const session = await this.collaborationService.joinSession(sessionId, {
-          userId,
-          username,
-        });
+        const { sessionId } = payload;
+        const session = await this.collaborationService.joinSession(
+          socket.data.user,
+          {
+            sessionId,
+          },
+        );
 
         socket.data.sessionId = session.id;
-        socket.data.userId = userId;
-        socket.data.username = username ?? null;
         socket.data.hasLeft = false;
         socket.join(this.roomName(session.id));
         this.emitSessionState(session);
@@ -38,13 +54,19 @@ export class CollaborationSocketManager {
       await this.handleAction(socket, payload, callback, async () => {
         const sessionId = payload.sessionId ?? socket.data.sessionId;
         const userId = payload.userId ?? socket.data.userId;
-        const result = await this.collaborationService.recordOperation(sessionId, {
-          ...payload,
-          userId,
-        });
+        const result = await this.collaborationService.recordOperation(
+          sessionId,
+          {
+            ...payload,
+            userId,
+          },
+        );
         this.io
           ?.to(this.roomName(result.session.id))
-          .emit("session:operation", { session: result.session, conflict: result.conflict });
+          .emit("session:operation", {
+            session: result.session,
+            conflict: result.conflict,
+          });
         return result;
       });
     });
@@ -53,10 +75,13 @@ export class CollaborationSocketManager {
       await this.handleAction(socket, payload, callback, async () => {
         const sessionId = payload.sessionId ?? socket.data.sessionId;
         const userId = payload.userId ?? socket.data.userId;
-        const session = await this.collaborationService.leaveSession(sessionId, {
-          ...payload,
-          userId,
-        });
+        const session = await this.collaborationService.leaveSession(
+          sessionId,
+          {
+            ...payload,
+            userId,
+          },
+        );
         socket.data.hasLeft = true;
         socket.leave(this.roomName(session.id));
         this.emitSessionState(session);
@@ -68,7 +93,10 @@ export class CollaborationSocketManager {
       await this.handleAction(socket, payload, callback, async () => {
         const sessionId = payload.sessionId ?? socket.data.sessionId;
         const userId = payload.userId ?? socket.data.userId;
-        const session = await this.collaborationService.reconnectParticipant(sessionId, userId);
+        const session = await this.collaborationService.reconnectParticipant(
+          sessionId,
+          userId,
+        );
         socket.join(this.roomName(session.id));
         socket.data.hasLeft = false;
         this.emitSessionState(session);
@@ -79,7 +107,10 @@ export class CollaborationSocketManager {
     socket.on("session:question:propose", async (payload = {}, callback) => {
       await this.handleAction(socket, payload, callback, async () => {
         const sessionId = payload.sessionId ?? socket.data.sessionId;
-        const session = await this.collaborationService.proposeQuestionChange(sessionId, payload);
+        const session = await this.collaborationService.proposeQuestionChange(
+          sessionId,
+          payload,
+        );
         this.emitSessionState(session);
         return { session };
       });
@@ -88,7 +119,10 @@ export class CollaborationSocketManager {
     socket.on("session:question:respond", async (payload = {}, callback) => {
       await this.handleAction(socket, payload, callback, async () => {
         const sessionId = payload.sessionId ?? socket.data.sessionId;
-        const session = await this.collaborationService.respondToQuestionChange(sessionId, payload);
+        const session = await this.collaborationService.respondToQuestionChange(
+          sessionId,
+          payload,
+        );
         this.emitSessionState(session);
         return { session };
       });
@@ -97,7 +131,10 @@ export class CollaborationSocketManager {
     socket.on("session:end", async (payload = {}, callback) => {
       await this.handleAction(socket, payload, callback, async () => {
         const sessionId = payload.sessionId ?? socket.data.sessionId;
-        const session = await this.collaborationService.requestSessionEnd(sessionId, payload);
+        const session = await this.collaborationService.requestSessionEnd(
+          sessionId,
+          payload,
+        );
         this.emitSessionState(session);
         return { session };
       });
@@ -112,10 +149,13 @@ export class CollaborationSocketManager {
         return;
       }
       try {
-        const session = await this.collaborationService.leaveSession(sessionId, {
-          userId,
-          reason: "disconnect",
-        });
+        const session = await this.collaborationService.leaveSession(
+          sessionId,
+          {
+            userId,
+            reason: "disconnect",
+          },
+        );
         this.emitSessionState(session);
       } catch (error) {
         if (error instanceof ApiError) {
@@ -143,9 +183,15 @@ export class CollaborationSocketManager {
       const apiError =
         error instanceof ApiError
           ? error
-          : new ApiError(500, "An unexpected error occurred while handling the socket event.");
+          : new ApiError(
+              500,
+              "An unexpected error occurred while handling the socket event.",
+            );
       if (typeof callback === "function") {
-        callback({ ok: false, error: { status: apiError.status, message: apiError.message } });
+        callback({
+          ok: false,
+          error: { status: apiError.status, message: apiError.message },
+        });
       }
       if (error !== apiError) {
         this.logger.error?.(error);

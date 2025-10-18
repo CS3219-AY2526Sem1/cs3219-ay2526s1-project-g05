@@ -2,6 +2,13 @@ import jwt from "jsonwebtoken";
 import { MongoClientInstance } from "./mongo.js";
 import { ObjectId } from "mongodb";
 
+/**
+ * Authentication middleware for EXPRESS to verify JWT tokens in incoming requests.
+ * @param {} req
+ * @param {*} res
+ * @param {*} next
+ * @returns
+ */
 export const authenticate = async (req, res, next) => {
   // Whitelist addresses from other services (to allow other services to call without needing user auth)
   if (
@@ -20,23 +27,35 @@ export const authenticate = async (req, res, next) => {
 
   token = token.replace("Bearer ", "");
 
+  const result = await verify_token_user(token);
+
+  if (result.success === false) {
+    return res.status(401).json({ error: result.error });
+  }
+
+  res.locals.user = result.decoded;
+
+  next();
+};
+
+export const verify_token_user = async (token) => {
   const decoded = verify_token(token);
   if (!decoded) {
-    return res.status(401).json({ error: "Invalid or expired token." });
+    return { success: false, error: "Invalid or expired token." };
   }
 
   const user_result = await MongoClientInstance.db
     .collection("users")
     .findOne({ _id: new ObjectId(decoded.id) });
   if (!user_result) {
-    return res.status(401).json({ error: "Invalid or expired token." });
+    return { success: false, error: "Invalid or expired token." };
   }
 
-  next();
+  return { success: true, decoded };
 };
 
-export const SIGNER_ALGORITHM = "HS256";
-export const SIGNER_EXPIRES_IN = "24h";
+const SIGNER_ALGORITHM = "HS256";
+const SIGNER_EXPIRES_IN = "24h";
 
 export const sign_token = (payload) => {
   return jwt.sign(payload, process.env.AUTHENTICATION_SECRET, {
