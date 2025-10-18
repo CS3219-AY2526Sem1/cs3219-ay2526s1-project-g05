@@ -78,12 +78,12 @@ export class CollaborationSessionService {
     );
   }
 
-  buildParticipant({ userId, displayName }) {
+  buildParticipant({ userId, displayName, connected }) {
     const now = this.now();
     return {
       userId,
       displayName: displayName ?? null,
-      connected: true,
+      connected: connected ?? false,
       joinedAt: now,
       lastSeenAt: now,
       disconnectedAt: null,
@@ -235,6 +235,7 @@ export class CollaborationSessionService {
   async joinSession(user, payload) {
     const { errors, normalized } =
       CollaborationSessionValidator.validateJoinSession(payload);
+
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
@@ -250,6 +251,7 @@ export class CollaborationSessionService {
     // Alwyas does nothing atm because there is no reconnectBy unless the user leaves
     this.ensureActive(session);
 
+    console.log(user.id);
     const participants = session.participants ?? [];
     const participant = this.getParticipant(session, user.id);
 
@@ -259,6 +261,8 @@ export class CollaborationSessionService {
         "You are not part of this collaboration session.",
       );
     }
+
+    console.log(participant);
 
     participants.forEach((item) => {
       if (item.userId !== user.id) return;

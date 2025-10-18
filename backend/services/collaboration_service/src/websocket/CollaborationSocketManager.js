@@ -34,18 +34,13 @@ export class CollaborationSocketManager {
   configureSocket(socket) {
     socket.on("session:join", async (payload = {}, callback) => {
       await this.handleAction(socket, payload, callback, async () => {
-        const { sessionId } = payload;
         const session = await this.collaborationService.joinSession(
           socket.data.user,
-          {
-            sessionId,
-          },
+          payload,
         );
 
-        console.log(session);
         socket.data.sessionId = session.id;
         socket.data.hasLeft = false;
-        socket.join(session.roomId);
         this.emitSessionState(session);
         return session;
       });

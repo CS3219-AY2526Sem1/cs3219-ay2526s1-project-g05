@@ -41,11 +41,11 @@ export class CollaborationSessionValidator {
     const normalized = {};
 
     const sessionId = this.normalizeString(payload.sessionId);
+
     if (!sessionId) {
       errors.push({ field: "sessionId", message: "sessionId is required." });
-    } else {
-      normalized.sessionId = sessionId;
     }
+    normalized.sessionId = sessionId;
 
     return { errors, normalized };
   }
