@@ -1,8 +1,7 @@
 import crypto from "crypto";
 import { ApiError } from "../errors/ApiError.js";
-import {
-  CollaborationSessionValidator,
-} from "../validators/CollaborationSessionValidator.js";
+import { CollaborationSessionValidator } from "../validators/CollaborationSessionValidator.js";
+import { fetchUser, fetchQuestion } from "../utils/fetchRequests.js";
 
 const MAX_PARTICIPANTS = 2;
 const DEFAULT_LANGUAGE = "javascript";
@@ -25,24 +24,30 @@ export class CollaborationSessionService {
 
   sanitizeSession(session) {
     if (!session) return null;
-    const sanitizedParticipants = (session.participants ?? []).map((participant) => ({
-      ...participant,
-      userId: participant.userId,
-      joinedAt: participant.joinedAt?.toISOString?.() ?? participant.joinedAt,
-      lastSeenAt: participant.lastSeenAt?.toISOString?.() ?? participant.lastSeenAt,
-      disconnectedAt:
-        participant.disconnectedAt?.toISOString?.() ?? participant.disconnectedAt ?? null,
-      reconnectBy:
-        participant.reconnectBy?.toISOString?.() ?? participant.reconnectBy ?? null,
-    }));
+    const sanitizedParticipants = (session.participants ?? []).map(
+      (participant) => ({
+        ...participant,
+        userId: participant.userId,
+        joinedAt: participant.joinedAt?.toISOString?.() ?? participant.joinedAt,
+        lastSeenAt:
+          participant.lastSeenAt?.toISOString?.() ?? participant.lastSeenAt,
+        disconnectedAt:
+          participant.disconnectedAt?.toISOString?.() ??
+          participant.disconnectedAt ??
+          null,
+        reconnectBy:
+          participant.reconnectBy?.toISOString?.() ??
+          participant.reconnectBy ??
+          null,
+      }),
+    );
 
     return {
       id: session._id?.toString?.() ?? session._id,
       roomId: session.roomId,
-      title: session.title ?? null,
       questionId: session.questionId ?? null,
+      code: session.code ?? "",
       language: session.language ?? DEFAULT_LANGUAGE,
-      codeSnapshot: session.codeSnapshot ?? "",
       version: session.version ?? 0,
       status: session.status ?? "active",
       pendingQuestionChange: session.pendingQuestionChange ?? null,
@@ -67,7 +72,10 @@ export class CollaborationSessionService {
         return candidate;
       }
     }
-    throw new ApiError(500, "Failed to generate a unique room id. Please try again.");
+    throw new ApiError(
+      500,
+      "Failed to generate a unique room id. Please try again.",
+    );
   }
 
   buildParticipant({ userId, displayName }) {
@@ -102,7 +110,9 @@ export class CollaborationSessionService {
     const participants = session.participants ?? [];
     const expired = participants.filter(
       (participant) =>
-        !participant.connected && participant.reconnectBy && participant.reconnectBy < now,
+        !participant.connected &&
+        participant.reconnectBy &&
+        participant.reconnectBy < now,
     );
 
     if (expired.length === 0) {
@@ -137,29 +147,54 @@ export class CollaborationSessionService {
   }
 
   getParticipant(session, userId) {
-    return (session.participants ?? []).find((participant) => participant.userId === userId) ?? null;
+    return (
+      (session.participants ?? []).find(
+        (participant) => participant.userId === userId,
+      ) ?? null
+    );
   }
 
   async createSession(payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateCreateSession(payload);
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateCreateSession(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
+    }
+
+    if (normalized.participants.length > MAX_PARTICIPANTS) {
+      throw new ApiError(
+        400,
+        `A maximum of ${MAX_PARTICIPANTS} participants are allowed per session.`,
+      );
     }
 
     const roomId = normalized.roomId
       ? await this.ensureRoomIdAvailability(normalized.roomId)
       : await this.generateUniqueRoomId();
 
+    const particiants_built = await Promise.all(
+      normalized.participants.map(async (id) => {
+        // Get user from user_service to fetch display name
+        const user = await fetchUser(id);
+        const participantObj = this.buildParticipant({
+          userId: id,
+          displayName: user.username,
+        });
+        return participantObj;
+      }),
+    );
+
+    const question = await fetchQuestion(normalized.questionId);
+
     const now = this.now();
     const session = await this.repository.create({
       roomId,
-      title: normalized.title ?? null,
       language: normalized.language ?? DEFAULT_LANGUAGE,
-      questionId: normalized.questionId ?? null,
-      codeSnapshot: normalized.initialCode ?? "",
+      questionId: normalized.questionId,
+      code: question.code, // Set code to the starter code
       version: 0,
       status: "active",
-      participants: [this.buildParticipant({ userId: normalized.hostUserId })],
+      participants: particiants_built,
       pendingQuestionChange: null,
       endRequests: [],
       cursorPositions: {},
@@ -175,7 +210,10 @@ export class CollaborationSessionService {
   async ensureRoomIdAvailability(roomId) {
     const existing = await this.repository.findByRoomId(roomId);
     if (existing) {
-      throw new ApiError(409, "Room id is already in use. Please choose another id.");
+      throw new ApiError(
+        409,
+        "Room id is already in use. Please choose another id.",
+      );
     }
     return roomId;
   }
@@ -194,60 +232,57 @@ export class CollaborationSessionService {
     return this.sanitizeSession(session);
   }
 
-  async joinSession(sessionId, payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateJoinSession(payload);
+  async joinSession(user, payload) {
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateJoinSession(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
 
+    const { sessionId } = normalized;
+
     let session = await this.repository.findById(sessionId);
+    if (!session) {
+      throw new ApiError(404, "Collaboration session not found.");
+    }
+
     session = await this.checkExpiredSession(session);
+    // Alwyas does nothing atm because there is no reconnectBy unless the user leaves
     this.ensureActive(session);
 
-    const now = this.now();
     const participants = session.participants ?? [];
-    const participant = this.getParticipant(session, normalized.userId);
+    const participant = this.getParticipant(session, user.id);
 
-    if (!participant && participants.length >= MAX_PARTICIPANTS) {
-      throw new ApiError(409, "The collaboration room is full.");
-    }
-
-    let updatedParticipants;
-    if (participant) {
-      updatedParticipants = participants.map((item) =>
-        item.userId === normalized.userId
-          ? {
-              ...item,
-              connected: true,
-              lastSeenAt: now,
-              disconnectedAt: null,
-              reconnectBy: null,
-              displayName: normalized.displayName ?? item.displayName ?? null,
-            }
-          : item,
+    if (!participant) {
+      throw new ApiError(
+        403,
+        "You are not part of this collaboration session.",
       );
-    } else {
-      updatedParticipants = [
-        ...participants,
-        this.buildParticipant({
-          userId: normalized.userId,
-          displayName: normalized.displayName,
-        }),
-      ];
     }
+
+    participants.forEach((item) => {
+      if (item.userId !== user.id) return;
+
+      item.connected = true;
+      item.lastSeenAt = this.now();
+      item.disconnectedAt = null;
+      item.reconnectBy = null;
+      item.displayName = user.name ?? item.displayName ?? null;
+    });
 
     const updatedSession = await this.repository.updateById(sessionId, {
       set: {
-        participants: updatedParticipants,
+        participants,
         status: "active",
       },
     });
 
-    return this.sanitizeSession(updatedSession);
+    return updatedSession ?? session;
   }
 
   async recordOperation(sessionId, payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateOperation(payload);
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateOperation(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
@@ -258,11 +293,19 @@ export class CollaborationSessionService {
 
     const participant = this.getParticipant(session, normalized.userId);
     if (!participant) {
-      throw new ApiError(403, "You are not part of this collaboration session.");
+      throw new ApiError(
+        403,
+        "You are not part of this collaboration session.",
+      );
     }
 
     const now = this.now();
-    const lockResult = this.acquireLock(sessionId, normalized.userId, normalized.range, now);
+    const lockResult = this.acquireLock(
+      sessionId,
+      normalized.userId,
+      normalized.range,
+      now,
+    );
     if (!lockResult.granted) {
       return {
         session: this.sanitizeSession(session),
@@ -277,7 +320,13 @@ export class CollaborationSessionService {
 
     const updatedParticipants = (session.participants ?? []).map((item) =>
       item.userId === normalized.userId
-        ? { ...item, lastSeenAt: now, connected: true, disconnectedAt: null, reconnectBy: null }
+        ? {
+            ...item,
+            lastSeenAt: now,
+            connected: true,
+            disconnectedAt: null,
+            reconnectBy: null,
+          }
         : item,
     );
 
@@ -336,8 +385,9 @@ export class CollaborationSessionService {
     }
 
     const expiresAt = new Date(now.getTime() + this.lockDurationMs);
-    const updatedLocks = validLocks.filter((lock) =>
-      !(lock.userId === userId && this.rangesOverlap(lock.range, range)),
+    const updatedLocks = validLocks.filter(
+      (lock) =>
+        !(lock.userId === userId && this.rangesOverlap(lock.range, range)),
     );
     updatedLocks.push({ userId, range, expiresAt });
     this.locks.set(sessionId, updatedLocks);
@@ -353,7 +403,8 @@ export class CollaborationSessionService {
     if (!locks) return;
 
     const remaining = locks.filter(
-      (lock) => !(lock.userId === userId && this.rangesOverlap(lock.range, range)),
+      (lock) =>
+        !(lock.userId === userId && this.rangesOverlap(lock.range, range)),
     );
     if (remaining.length === 0) {
       this.locks.delete(sessionId);
@@ -368,7 +419,8 @@ export class CollaborationSessionService {
   }
 
   async leaveSession(sessionId, payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateLeaveSession(payload);
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateLeaveSession(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
@@ -379,7 +431,10 @@ export class CollaborationSessionService {
 
     const participant = this.getParticipant(session, normalized.userId);
     if (!participant) {
-      throw new ApiError(403, "You are not part of this collaboration session.");
+      throw new ApiError(
+        403,
+        "You are not part of this collaboration session.",
+      );
     }
 
     const now = this.now();
@@ -407,7 +462,9 @@ export class CollaborationSessionService {
       );
     }
 
-    const activeParticipants = updatedParticipants.filter((item) => item.connected);
+    const activeParticipants = updatedParticipants.filter(
+      (item) => item.connected,
+    );
     if (activeParticipants.length === 0) {
       updatedStatus = "ended";
     }
@@ -420,43 +477,6 @@ export class CollaborationSessionService {
     });
 
     this.releaseAllLocksForUser(sessionId, normalized.userId);
-
-    return this.sanitizeSession(updatedSession);
-  }
-
-  async reconnectParticipant(sessionId, userId) {
-    let session = await this.repository.findById(sessionId);
-    session = await this.checkExpiredSession(session);
-    this.ensureActive(session);
-
-    const participant = this.getParticipant(session, userId);
-    if (!participant) {
-      throw new ApiError(403, "You are not part of this collaboration session.");
-    }
-
-    const now = this.now();
-    if (participant.reconnectBy && participant.reconnectBy < now) {
-      throw new ApiError(410, "Reconnection window has expired.");
-    }
-
-    const updatedParticipants = (session.participants ?? []).map((item) =>
-      item.userId === userId
-        ? {
-            ...item,
-            connected: true,
-            disconnectedAt: null,
-            reconnectBy: null,
-            lastSeenAt: now,
-          }
-        : item,
-    );
-
-    const updatedSession = await this.repository.updateById(sessionId, {
-      set: {
-        participants: updatedParticipants,
-        status: "active",
-      },
-    });
 
     return this.sanitizeSession(updatedSession);
   }
@@ -478,7 +498,9 @@ export class CollaborationSessionService {
     const now = this.now();
     const someoneCanReconnect = participants.some(
       (participant) =>
-        !participant.connected && participant.reconnectBy && participant.reconnectBy > now,
+        !participant.connected &&
+        participant.reconnectBy &&
+        participant.reconnectBy > now,
     );
     if (someoneCanReconnect) {
       return null;
@@ -495,7 +517,8 @@ export class CollaborationSessionService {
   }
 
   async proposeQuestionChange(sessionId, payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateQuestionProposal(payload);
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateQuestionProposal(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
@@ -506,11 +529,17 @@ export class CollaborationSessionService {
 
     const participant = this.getParticipant(session, normalized.userId);
     if (!participant) {
-      throw new ApiError(403, "You are not part of this collaboration session.");
+      throw new ApiError(
+        403,
+        "You are not part of this collaboration session.",
+      );
     }
 
     if (session.pendingQuestionChange) {
-      throw new ApiError(409, "There is already a pending question change request.");
+      throw new ApiError(
+        409,
+        "There is already a pending question change request.",
+      );
     }
 
     const now = this.now();
@@ -532,7 +561,8 @@ export class CollaborationSessionService {
   }
 
   async respondToQuestionChange(sessionId, payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateQuestionResponse(payload);
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateQuestionResponse(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
@@ -547,7 +577,10 @@ export class CollaborationSessionService {
 
     const participant = this.getParticipant(session, normalized.userId);
     if (!participant) {
-      throw new ApiError(403, "You are not part of this collaboration session.");
+      throw new ApiError(
+        403,
+        "You are not part of this collaboration session.",
+      );
     }
 
     const pending = session.pendingQuestionChange;
@@ -592,7 +625,8 @@ export class CollaborationSessionService {
   }
 
   async requestSessionEnd(sessionId, payload) {
-    const { errors, normalized } = CollaborationSessionValidator.validateEndSessionRequest(payload);
+    const { errors, normalized } =
+      CollaborationSessionValidator.validateEndSessionRequest(payload);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
@@ -602,7 +636,10 @@ export class CollaborationSessionService {
 
     const participant = this.getParticipant(session, normalized.userId);
     if (!participant) {
-      throw new ApiError(403, "You are not part of this collaboration session.");
+      throw new ApiError(
+        403,
+        "You are not part of this collaboration session.",
+      );
     }
 
     const approvals = new Set(session.endRequests ?? []);

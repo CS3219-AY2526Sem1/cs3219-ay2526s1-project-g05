@@ -11,33 +11,27 @@ export class CollaborationSessionValidator {
     const errors = [];
     const normalized = {};
 
-    const hostUserId = this.normalizeString(payload.hostUserId);
-    if (!hostUserId) {
-      errors.push({ field: "hostUserId", message: "hostUserId is required." });
-    } else {
-      normalized.hostUserId = hostUserId;
+    const participants = Array.isArray(payload.participants);
+    if (!participants) {
+      errors.push({
+        field: "participants",
+        message: "participants is required.",
+      });
     }
+    normalized.participants = payload.participants;
 
-    const roomId = this.normalizeString(payload.roomId);
-    if (roomId) {
-      normalized.roomId = roomId;
+    const questionId = payload.questionId;
+    if (!questionId) {
+      errors.push({ field: "questionId", message: "questionId is required." });
     }
-
-    const questionId = this.normalizeString(payload.questionId);
-    if (questionId) {
-      normalized.questionId = questionId;
-    }
+    normalized.questionId = questionId;
 
     const language = this.normalizeString(payload.language) ?? "javascript";
     normalized.language = language;
 
-    const initialCode = typeof payload.initialCode === "string" ? payload.initialCode : "";
+    const initialCode =
+      typeof payload.initialCode === "string" ? payload.initialCode : "";
     normalized.initialCode = initialCode;
-
-    const title = this.normalizeString(payload.title);
-    if (title) {
-      normalized.title = title;
-    }
 
     return { errors, normalized };
   }
@@ -46,21 +40,11 @@ export class CollaborationSessionValidator {
     const errors = [];
     const normalized = {};
 
-    const userId = this.normalizeString(payload.userId);
-    if (!userId) {
-      errors.push({ field: "userId", message: "userId is required." });
+    const sessionId = this.normalizeString(payload.sessionId);
+    if (!sessionId) {
+      errors.push({ field: "sessionId", message: "sessionId is required." });
     } else {
-      normalized.userId = userId;
-    }
-
-    const roomId = this.normalizeString(payload.roomId);
-    if (roomId) {
-      normalized.roomId = roomId;
-    }
-
-    const username = this.normalizeString(payload.username);
-    if (username) {
-      normalized.username = username;
+      normalized.sessionId = sessionId;
     }
 
     return { errors, normalized };
@@ -79,14 +63,21 @@ export class CollaborationSessionValidator {
 
     const version = Number(payload.version);
     if (!Number.isInteger(version) || version < 0) {
-      errors.push({ field: "version", message: "version must be a non-negative integer." });
+      errors.push({
+        field: "version",
+        message: "version must be a non-negative integer.",
+      });
     } else {
       normalized.version = version;
     }
 
     const type = this.normalizeString(payload.type);
     if (!type || !LOCK_TYPES.includes(type)) {
-      errors.push({ field: "type", message: "type must be one of insert, delete, replace, cursor, selection." });
+      errors.push({
+        field: "type",
+        message:
+          "type must be one of insert, delete, replace, cursor, selection.",
+      });
     } else {
       normalized.type = type;
     }
@@ -105,9 +96,16 @@ export class CollaborationSessionValidator {
       }
     }
 
-    const content = typeof payload.content === "string" ? payload.content : null;
-    if (content == null && ["insert", "delete", "replace"].includes(normalized.type)) {
-      errors.push({ field: "content", message: "content must be provided for text-changing operations." });
+    const content =
+      typeof payload.content === "string" ? payload.content : null;
+    if (
+      content == null &&
+      ["insert", "delete", "replace"].includes(normalized.type)
+    ) {
+      errors.push({
+        field: "content",
+        message: "content must be provided for text-changing operations.",
+      });
     } else if (content != null) {
       normalized.content = content;
     }
@@ -120,11 +118,17 @@ export class CollaborationSessionValidator {
     const end = Number(range?.end);
 
     if (!Number.isInteger(start) || start < 0) {
-      errors.push({ field: "range.start", message: "range.start must be a non-negative integer." });
+      errors.push({
+        field: "range.start",
+        message: "range.start must be a non-negative integer.",
+      });
       return null;
     }
     if (!Number.isInteger(end) || end < start) {
-      errors.push({ field: "range.end", message: "range.end must be an integer greater than or equal to start." });
+      errors.push({
+        field: "range.end",
+        message: "range.end must be an integer greater than or equal to start.",
+      });
       return null;
     }
 
@@ -135,11 +139,17 @@ export class CollaborationSessionValidator {
     const line = Number(cursor?.line);
     const column = Number(cursor?.column);
     if (!Number.isInteger(line) || line < 0) {
-      errors.push({ field: "cursor.line", message: "cursor.line must be a non-negative integer." });
+      errors.push({
+        field: "cursor.line",
+        message: "cursor.line must be a non-negative integer.",
+      });
       return null;
     }
     if (!Number.isInteger(column) || column < 0) {
-      errors.push({ field: "cursor.column", message: "cursor.column must be a non-negative integer." });
+      errors.push({
+        field: "cursor.column",
+        message: "cursor.column must be a non-negative integer.",
+      });
       return null;
     }
     return { line, column };

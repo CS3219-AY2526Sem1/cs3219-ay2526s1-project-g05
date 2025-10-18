@@ -42,11 +42,12 @@ export class CollaborationSocketManager {
           },
         );
 
+        console.log(session);
         socket.data.sessionId = session.id;
         socket.data.hasLeft = false;
-        socket.join(this.roomName(session.id));
+        socket.join(session.roomId);
         this.emitSessionState(session);
-        return { session };
+        return session;
       });
     });
 
@@ -84,21 +85,6 @@ export class CollaborationSocketManager {
         );
         socket.data.hasLeft = true;
         socket.leave(this.roomName(session.id));
-        this.emitSessionState(session);
-        return { session };
-      });
-    });
-
-    socket.on("session:reconnect", async (payload = {}, callback) => {
-      await this.handleAction(socket, payload, callback, async () => {
-        const sessionId = payload.sessionId ?? socket.data.sessionId;
-        const userId = payload.userId ?? socket.data.userId;
-        const session = await this.collaborationService.reconnectParticipant(
-          sessionId,
-          userId,
-        );
-        socket.join(this.roomName(session.id));
-        socket.data.hasLeft = false;
         this.emitSessionState(session);
         return { session };
       });
@@ -205,7 +191,8 @@ export class CollaborationSocketManager {
 
   emitSessionState(session) {
     if (!this.io || !session?.id) return;
-    this.io.to(this.roomName(session.id)).emit("session:state", { session });
+
+    this.io.to(session.roomId).emit("session:state", { session });
   }
 
   hasActiveSocketForUser(sessionId, userId, excludeSocketId) {
