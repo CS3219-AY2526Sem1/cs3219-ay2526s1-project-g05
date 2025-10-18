@@ -1,36 +1,21 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import App from './App.jsx'
-import './App.css'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider";
+import AppRoutes from "@/routes/AppRoutes";
+import { UserProvider } from "@/context/UserContext";
+import "@/App.css";
+import { Toaster } from "sonner";
 
-import LoginPage from '@/pages/auth/LoginPage.jsx'
-import RegisterPage from '@/pages/auth/RegisterPage.jsx'
-import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage.jsx';
-import ErrorPage from '@/pages/ErrorPage.jsx';
-import QuestionPage from '@/pages/QuestionPage.jsx';
-import ProfilePage from '@/pages/auth/ProfilePage.jsx';
-import MatchmakingPage from '@/pages/MatchmakingPage.jsx';
-import { ThemeProvider } from './components/theme-provider.jsx';
-
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/problemset" element={<QuestionPage />} />
-          <Route path="/matchmaking" element={<MatchmakingPage />} />
-          <Route path="/404" element={<ErrorPage />} />
-
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
-      </BrowserRouter>
+        <Toaster />
+        <BrowserRouter>
+          <UserProvider>
+              <AppRoutes />
+          </UserProvider>
+        </BrowserRouter>
     </ThemeProvider>
   </StrictMode>
 );

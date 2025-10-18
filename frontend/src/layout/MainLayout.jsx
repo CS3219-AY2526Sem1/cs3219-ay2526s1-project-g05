@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/Navbar"
 import { Footer } from '@/components/Footer'
-import { Toaster } from "sonner";
 
 function MainLayout({ children }) {
   return (
@@ -8,7 +7,6 @@ function MainLayout({ children }) {
       <Navbar />
       <div>{children}</div>
       <Footer />
-      <Toaster />
     </div>
   )
 }

@@ -73,7 +73,7 @@ function RowCell({ row, children, field }) {
   const navigate = useNavigate();
   return (
     <div
-      onClick={() => navigate(`/problemset/${row.original.QID}`)}
+      onClick={() => navigate(`/question/${row.original.QID}`)}
       className="cursor-pointer hover:bg-gray-50 p-2 transition duration-150"
     >
       {children ?? row.getValue(field)}

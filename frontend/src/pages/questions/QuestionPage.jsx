@@ -25,10 +25,6 @@ export default function QuestionPage() {
     })();
   }, []);
 
-  const handleRowClick = (question) => {
-    navigate(`/problemset/${question.QID}`);
-  };
-
   return (
     <MainLayout>
       <div className="h-full flex-1 flex-col p-8 md:flex">
