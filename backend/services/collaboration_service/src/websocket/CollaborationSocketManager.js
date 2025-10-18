@@ -41,6 +41,8 @@ export class CollaborationSocketManager {
 
         socket.data.sessionId = session.id;
         socket.data.hasLeft = false;
+        socket.data.roomId = session.roomId;
+        socket.join(session.roomId);
         this.emitSessionState(session);
         return session;
       });
@@ -69,17 +71,13 @@ export class CollaborationSocketManager {
 
     socket.on("session:leave", async (payload = {}, callback) => {
       await this.handleAction(socket, payload, callback, async () => {
-        const sessionId = payload.sessionId ?? socket.data.sessionId;
-        const userId = payload.userId ?? socket.data.userId;
-        const session = await this.collaborationService.leaveSession(
-          sessionId,
-          {
-            ...payload,
-            userId,
-          },
-        );
+        const session = await this.collaborationService.leaveSession({
+          userId: socket.data.user.id,
+          sessionId: socket.data.sessionId,
+          reason: "leave",
+        });
         socket.data.hasLeft = true;
-        socket.leave(this.roomName(session.id));
+        socket.leave(session.roomId);
         this.emitSessionState(session);
         return { session };
       });
@@ -122,21 +120,19 @@ export class CollaborationSocketManager {
     });
 
     socket.on("disconnect", async () => {
-      const { sessionId, userId, hasLeft } = socket.data ?? {};
-      if (!sessionId || !userId || hasLeft) {
+      const { sessionId, user, hasLeft } = socket.data ?? {};
+      if (!sessionId || hasLeft) {
         return;
       }
-      if (this.hasActiveSocketForUser(sessionId, userId, socket.id)) {
+      if (this.hasActiveSocketForUser(sessionId, user.id, socket.id)) {
         return;
       }
       try {
-        const session = await this.collaborationService.leaveSession(
-          sessionId,
-          {
-            userId,
-            reason: "disconnect",
-          },
-        );
+        const session = await this.collaborationService.leaveSession({
+          userId: user.id,
+          sessionId: socket.data.sessionId,
+          reason: "disconnect",
+        });
         this.emitSessionState(session);
       } catch (error) {
         if (error instanceof ApiError) {

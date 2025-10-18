@@ -166,6 +166,13 @@ export class CollaborationSessionValidator {
       normalized.userId = userId;
     }
 
+    const sessionId = this.normalizeString(payload.sessionId);
+    if (!sessionId) {
+      errors.push({ field: "sessionId", message: "sessionId is required." });
+    } else {
+      normalized.sessionId = usersessionIdId;
+    }
+
     const reason = this.normalizeString(payload.reason);
     if (reason) {
       normalized.reason = reason;

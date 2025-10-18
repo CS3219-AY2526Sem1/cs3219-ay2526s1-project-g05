@@ -60,22 +60,14 @@ export class CollaborationSessionService {
     };
   }
 
-  async generateRoomId() {
-    return crypto.randomBytes(3).toString("hex");
-  }
-
   async generateUniqueRoomId() {
-    for (let attempt = 0; attempt < 8; attempt += 1) {
-      const candidate = await this.generateRoomId();
+    while (true) {
+      const candidate = await this.crypto.randomBytes(3).toString("hex")();
       const existing = await this.repository.findByRoomId(candidate);
       if (!existing) {
         return candidate;
       }
     }
-    throw new ApiError(
-      500,
-      "Failed to generate a unique room id. Please try again.",
-    );
   }
 
   buildParticipant({ userId, displayName, connected }) {
@@ -251,7 +243,6 @@ export class CollaborationSessionService {
     // Alwyas does nothing atm because there is no reconnectBy unless the user leaves
     this.ensureActive(session);
 
-    console.log(user.id);
     const participants = session.participants ?? [];
     const participant = this.getParticipant(session, user.id);
 
@@ -261,8 +252,6 @@ export class CollaborationSessionService {
         "You are not part of this collaboration session.",
       );
     }
-
-    console.log(participant);
 
     participants.forEach((item) => {
       if (item.userId !== user.id) return;
