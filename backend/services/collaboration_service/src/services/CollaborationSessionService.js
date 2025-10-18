@@ -240,7 +240,7 @@ export class CollaborationSessionService {
     }
 
     session = await this.checkExpiredSession(session);
-    // Alwyas does nothing atm because there is no reconnectBy unless the user leaves
+    // Always does nothing atm because there is no reconnectBy unless the user leaves
     this.ensureActive(session);
 
     const participants = session.participants ?? [];
