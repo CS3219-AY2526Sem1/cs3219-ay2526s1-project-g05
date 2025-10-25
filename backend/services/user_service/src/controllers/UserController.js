@@ -23,10 +23,31 @@ export class UserController {
     }
   };
 
+  getMe = async (req, res, next) => {
+    try {
+      const user = await this.userService.getUserById(res.locals.user.id);
+      res.json({ user });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getById = async (req, res, next) => {
     try {
       const user = await this.userService.getUserById(req.params.id);
       res.json({ user });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateMe = async (req, res, next) => {
+    try {
+      const user = await this.userService.updateUser(
+        res.locals.user.id,
+        req.body ?? {},
+      );
+      res.json({ message: "User updated successfully.", user });
     } catch (error) {
       next(error);
     }
@@ -39,6 +60,15 @@ export class UserController {
         req.body ?? {},
       );
       res.json({ message: "User updated successfully.", user });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteMe = async (req, res, next) => {
+    try {
+      await this.userService.deleteUser(res.locals.user.id, req.body?.password);
+      res.json({ message: "User deleted successfully." });
     } catch (error) {
       next(error);
     }
@@ -79,6 +109,38 @@ export class UserController {
         req.body?.password,
       );
       res.json({ message: "Password reset successfully.", user });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  addPastCollaborationSession = async (req, res, next) => {
+    try {
+      const { userId, sessionId } = req.body ?? {};
+      const user = await this.userService.addPastCollaborationSession(
+        userId,
+        sessionId,
+      );
+      res.json({
+        message: "Past collaboration session added successfully.",
+        user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateCurrentCollaborationSession = async (req, res, next) => {
+    try {
+      const { userId, sessionId } = req.body ?? {};
+      const user = await this.userService.updateCurrentCollaborationSession(
+        userId,
+        sessionId,
+      );
+      res.json({
+        message: "Current collaboration session updated successfully.",
+        user,
+      });
     } catch (error) {
       next(error);
     }

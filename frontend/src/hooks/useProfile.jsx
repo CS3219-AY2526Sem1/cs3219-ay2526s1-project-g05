@@ -32,29 +32,15 @@ export function useProfile() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        try {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-        } catch (error) {
-          console.error("Error parsing user data:", error);
-          navigate("/login");
-        }
-      } else {
-        navigate("/login");
-      }
-    } else {
-      setEditFormData({
-        username: user.username,
-        email: user.email,
-        currentPassword: "",
-        newPassword: "",
-      });
-    }
-  }, [user, navigate, setUser]);
+    if (!user) return;
 
+    setEditFormData({
+      username: user.username,
+      email: user.email,
+      currentPassword: "",
+      newPassword: "",
+    });
+  }, [user, navigate, setUser]);
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) {
@@ -66,9 +52,8 @@ export function useProfile() {
     setDeleteError("");
 
     try {
-      await userApi.delete(user.id, deletePassword);
+      await userApi.delete(deletePassword);
 
-      localStorage.removeItem("user");
       localStorage.removeItem("token");
       window.dispatchEvent(new Event("userLoggedOut"));
 
@@ -76,7 +61,9 @@ export function useProfile() {
       navigate("/");
     } catch (error) {
       console.error("Delete account error:", error);
-      setDeleteError(error.message || "Unable to delete account. Please try again later.");
+      setDeleteError(
+        error.message || "Unable to delete account. Please try again later.",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -127,21 +114,26 @@ export function useProfile() {
     try {
       const updates = {};
 
-      if (editFormData.username !== user.username) updates.username = editFormData.username;
+      if (editFormData.username !== user.username)
+        updates.username = editFormData.username;
       if (editFormData.email !== user.email) updates.email = editFormData.email;
 
       if (editFormData.newPassword) {
         if (!editFormData.currentPassword) {
           setEditFieldErrors((prev) => ({
             ...prev,
-            currentPassword: "Current password is required to set a new password.",
+            currentPassword:
+              "Current password is required to set a new password.",
           }));
           setIsSaving(false);
           return;
         }
 
         try {
-          await userApi.login({ email: user.email, password: editFormData.currentPassword });
+          await userApi.login({
+            email: user.email,
+            password: editFormData.currentPassword,
+          });
         } catch {
           setEditFieldErrors((prev) => ({
             ...prev,
@@ -155,12 +147,15 @@ export function useProfile() {
       }
 
       if (Object.keys(updates).length === 0) {
-        setEditFieldErrors((prev) => ({ ...prev, general: "No changes detected." }));
+        setEditFieldErrors((prev) => ({
+          ...prev,
+          general: "No changes detected.",
+        }));
         setIsSaving(false);
         return;
       }
 
-      const response = await userApi.update(user.id, updates);
+      const response = await userApi.update(updates);
       const updatedUser = { ...user, ...response.user };
       setUser(updatedUser);
 
@@ -175,7 +170,8 @@ export function useProfile() {
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Update profile error:", error);
-      if (error.errors && Array.isArray(error.errors)) setEditFieldErrors(parseEditErrors(error.errors));
+      if (error.errors && Array.isArray(error.errors))
+        setEditFieldErrors(parseEditErrors(error.errors));
       else setEditFieldErrors(parseEditErrors([error.message]));
     } finally {
       setIsSaving(false);
@@ -215,7 +211,9 @@ export function useProfile() {
     deletePassword,
     deleteError,
     isDeleting,
-    userInitials: user?.username ? user.username.substring(0, 2).toUpperCase() : "U",
+    userInitials: user?.username
+      ? user.username.substring(0, 2).toUpperCase()
+      : "U",
 
     setIsEditingProfile,
     handleEditInputChange,

@@ -55,7 +55,7 @@ export class UserRepository {
     });
   }
 
-  async updateById(id, { set = {}, unset = {} }) {
+  async updateById(id, { set = {}, unset = {}, push = {} }) {
     if (!ObjectId.isValid(id)) {
       return null;
     }
@@ -64,6 +64,9 @@ export class UserRepository {
     update.$set = { updatedAt, ...set };
     if (Object.keys(unset).length > 0) {
       update.$unset = unset;
+    }
+    if (Object.keys(push).length > 0) {
+      update.$push = push;
     }
 
     const result = await this.collection.findOneAndUpdate(
@@ -74,12 +77,15 @@ export class UserRepository {
     return result;
   }
 
-  async updateOne(filter, { set = {}, unset = {} }) {
+  async updateOne(filter, { set = {}, unset = {}, push = {} }) {
     const update = {};
     const updatedAt = new Date();
     update.$set = { updatedAt, ...set };
     if (Object.keys(unset).length > 0) {
       update.$unset = unset;
+    }
+    if (Object.keys(push).length > 0) {
+      update.$push = push;
     }
 
     const result = await this.collection.findOneAndUpdate(filter, update, {

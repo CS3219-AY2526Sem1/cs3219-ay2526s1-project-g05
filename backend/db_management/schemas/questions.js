@@ -74,3 +74,8 @@ export const question_indexes = [
   { key: { difficulty: 1 }, options: { name: "difficulty_index" } },
   { key: { title: "text" }, options: { name: "title_text_index" } },
 ];
+
+export const question_user = {
+  username: process.env.QUESTIONSERVICE_DB_USER,
+  password: process.env.QUESTIONSERVICE_DB_PASSWORD,
+};

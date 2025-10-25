@@ -1,18 +1,24 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+const API_BASE_URL = import.meta.env.MODE === "production" ? "/api" : "";
 
 /**
  * Base fetch wrapper with error handling
  */
-async function apiFetch(endpoint, options = {}) {
+export async function apiFetch(endpoint, options = {}, isAuthenticated = true) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+  const token = localStorage.getItem("token");
+
   const config = {
     headers: {
       "Content-Type": "application/json",
+
       ...options.headers,
     },
     ...options,
   };
+
+  if (isAuthenticated) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, config);
   const data = await response.json();
@@ -27,6 +33,8 @@ async function apiFetch(endpoint, options = {}) {
   return data;
 }
 
+const USER_API_BASE_URL =
+  import.meta.env.MODE === "production" ? "/users" : "http://localhost:4001";
 /**
  * User API methods
  */
@@ -40,10 +48,14 @@ export const userApi = {
    * @returns {Promise<Object>} Registered user data
    */
   register: async (userData) => {
-    return apiFetch("/users/register", {
-      method: "POST",
-      body: JSON.stringify(userData),
-    });
+    return apiFetch(
+      `${USER_API_BASE_URL}/register`,
+      {
+        method: "POST",
+        body: JSON.stringify(userData),
+      },
+      false,
+    );
   },
 
   /**
@@ -54,31 +66,33 @@ export const userApi = {
    * @returns {Promise<Object>} User data and authentication token
    */
   login: async (credentials) => {
-    return apiFetch("/users/login", {
-      method: "POST",
-      body: JSON.stringify(credentials),
-    });
+    return apiFetch(
+      `${USER_API_BASE_URL}/login`,
+      {
+        method: "POST",
+        body: JSON.stringify(credentials),
+      },
+      false,
+    );
   },
 
   /**
-   * Get user by ID
-   * @param {string} userId - User ID
+   * Get own user
    * @returns {Promise<Object>} User data
    */
-  getById: async (userId) => {
-    return apiFetch(`/users/${userId}`, {
+  getMe: async () => {
+    return apiFetch(`${USER_API_BASE_URL}/me`, {
       method: "GET",
     });
   },
 
   /**
-   * Update user information
-   * @param {string} userId - User ID
+   * Update own user
    * @param {Object} updates - Fields to update
    * @returns {Promise<Object>} Updated user data
    */
-  update: async (userId, updates) => {
-    return apiFetch(`/users/${userId}`, {
+  update: async (updates) => {
+    return apiFetch(`${USER_API_BASE_URL}/me`, {
       method: "PATCH",
       body: JSON.stringify(updates),
     });
@@ -86,12 +100,11 @@ export const userApi = {
 
   /**
    * Delete user account
-   * @param {string} userId - User ID
    * @param {string} password - Password confirmation
    * @returns {Promise<Object>} Deletion confirmation
    */
-  delete: async (userId, password) => {
-    return apiFetch(`/users/${userId}`, {
+  delete: async (password) => {
+    return apiFetch(`${USER_API_BASE_URL}/me`, {
       method: "DELETE",
       body: JSON.stringify({ password }),
     });
@@ -103,7 +116,7 @@ export const userApi = {
    * @returns {Promise<Object>} Password reset confirmation
    */
   requestPasswordReset: async (email) => {
-    return apiFetch("/users/password-reset/request", {
+    return apiFetch(`${USER_API_BASE_URL}/password-reset/request`, {
       method: "POST",
       body: JSON.stringify({ email }),
     });
@@ -116,10 +129,9 @@ export const userApi = {
    * @returns {Promise<Object>} Password reset confirmation
    */
   resetPassword: async (token, newPassword) => {
-    return apiFetch("/users/password-reset/confirm", {
+    return apiFetch(`${USER_API_BASE_URL}/password-reset/confirm`, {
       method: "POST",
       body: JSON.stringify({ token, password: newPassword }),
     });
   },
 };
-

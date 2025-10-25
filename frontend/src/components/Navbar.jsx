@@ -24,6 +24,7 @@ import { Menu, User } from "lucide-react";
 import { useState } from "react";
 import { ModeToggle } from "./mode-toggle";
 import { buttonVariants } from "./ui/button";
+import { NavLink } from "react-router-dom";
 
 const routeList = [
   { href: "/problemset", label: "Problems" },
@@ -41,9 +42,13 @@ export const Navbar = () => {
         <NavigationMenuList className="container h-14 px-4 w-screen flex justify-between ">
           {/* Logo */}
           <NavigationMenuItem className="font-bold flex">
-            <a rel="noreferrer noopener" href="/" className="ml-2 font-bold text-xl flex">
+            <NavLink
+              rel="noreferrer noopener"
+              to="/"
+              className="ml-2 font-bold text-xl flex"
+            >
               <img src={logo} style={{ height: "55px" }} alt="logo" />
-            </a>
+            </NavLink>
           </NavigationMenuItem>
 
           {/* Mobile */}
@@ -52,7 +57,10 @@ export const Navbar = () => {
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger className="px-2">
-                <Menu className="flex md:hidden h-5 w-5" onClick={() => setIsOpen(true)}>
+                <Menu
+                  className="flex md:hidden h-5 w-5"
+                  onClick={() => setIsOpen(true)}
+                >
                   <span className="sr-only">Menu Icon</span>
                 </Menu>
               </SheetTrigger>
@@ -64,25 +72,25 @@ export const Navbar = () => {
 
                 <nav className="flex flex-col justify-center items-center gap-2 mt-4">
                   {routeList.map(({ href, label }) => (
-                    <a
+                    <NavLink
                       key={label}
-                      href={href}
+                      to={href}
                       onClick={() => setIsOpen(false)}
                       className={buttonVariants({ variant: "ghost" })}
                     >
                       {label}
-                    </a>
+                    </NavLink>
                   ))}
 
                   {user ? (
                     <>
-                      <a
-                        href="/profile"
+                      <NavLink
+                        to="/profile"
                         onClick={() => setIsOpen(false)}
                         className={buttonVariants({ variant: "ghost" })}
                       >
                         Profile
-                      </a>
+                      </NavLink>
 
                       {/* Logout button styled like other menu items */}
                       <button
@@ -90,19 +98,22 @@ export const Navbar = () => {
                           logout();
                           setIsOpen(false);
                         }}
-                        className={buttonVariants({ variant: "ghost", className: "text-destructive" })}
+                        className={buttonVariants({
+                          variant: "ghost",
+                          className: "text-destructive",
+                        })}
                       >
                         Log Out
                       </button>
                     </>
                   ) : (
-                    <a
-                      href="/login"
+                    <NavLink
+                      to="/login"
                       onClick={() => setIsOpen(false)}
                       className={buttonVariants({ variant: "ghost" })}
                     >
                       Log In
-                    </a>
+                    </NavLink>
                   )}
                 </nav>
               </SheetContent>
@@ -112,14 +123,16 @@ export const Navbar = () => {
           {/* Desktop */}
           <nav className="hidden md:flex gap-2">
             {routeList.map(({ href, label }, i) => (
-              <a
+              <NavLink
                 rel="noreferrer noopener"
-                href={href}
+                to={href}
                 key={i}
-                className={`text-[17px] ${buttonVariants({ variant: "ghost" })}`}
+                className={`text-[17px] ${buttonVariants({
+                  variant: "ghost",
+                })}`}
               >
                 {label}
-              </a>
+              </NavLink>
             ))}
           </nav>
 
@@ -127,7 +140,9 @@ export const Navbar = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className={`border ${buttonVariants({ variant: "secondary" })}`}
+                  className={`border ${buttonVariants({
+                    variant: "secondary",
+                  })}`}
                 >
                   <User className="mr-2 h-4 w-4 inline" />
                   Hi, {user.username || "User"}
@@ -135,10 +150,10 @@ export const Navbar = () => {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuLabel>Account</DropdownMenuLabel>
                   <DropdownMenuItem asChild>
-                    <a href="/profile">Profile</a>
+                    <NavLink to="/profile">Profile</NavLink>
                   </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                    <a href="/session-history">Past Sessions</a>
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/session-history">Past Sessions</NavLink>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -150,13 +165,13 @@ export const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <a
+              <NavLink
                 rel="noreferrer noopener"
-                href="/login"
+                to="/login"
                 className={`border ${buttonVariants({ variant: "secondary" })}`}
               >
                 Log In
-              </a>
+              </NavLink>
             )}
 
             <ModeToggle />

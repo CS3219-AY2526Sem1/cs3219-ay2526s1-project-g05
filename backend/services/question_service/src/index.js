@@ -8,7 +8,12 @@ const app = express();
 const PORT = process.env.QUESTIONSERVICEPORT || 4002;
 
 const start = async () => {
-  if (!(await MongoClientInstance.start())) {
+  if (
+    !(await MongoClientInstance.start(
+      process.env.QUESTIONSERVICE_DB_USER,
+      process.env.QUESTIONSERVICE_DB_PASSWORD,
+    ))
+  ) {
     console.error("Failed to connect to MongoDB");
     process.exit(1);
   }
@@ -31,7 +36,7 @@ const start = async () => {
     res.json({ status: "Question service is running" });
   });
 
-  app.use("/questions", use_question_routes());
+  app.use("/", use_question_routes());
 
   app.listen(PORT, () => {
     console.log(`Question service running on 127.0.0.1:${PORT}`);

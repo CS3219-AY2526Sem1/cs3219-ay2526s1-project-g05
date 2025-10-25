@@ -7,16 +7,7 @@ export class CollaborationSessionRepository {
 
   static async initialize(db) {
     const repository = new CollaborationSessionRepository(db);
-    await repository.ensureIndexes();
     return repository;
-  }
-
-  async ensureIndexes() {
-    await Promise.all([
-      this.collection.createIndex({ roomId: 1 }, { unique: true, name: "uniq_room" }),
-      this.collection.createIndex({ "participants.userId": 1 }, { name: "participants_user" }),
-      this.collection.createIndex({ status: 1, updatedAt: 1 }, { name: "status_updated" }),
-    ]);
   }
 
   buildUpdate({ set = {}, unset = {}, inc = {}, push = {}, pull = {} } = {}) {
@@ -61,10 +52,6 @@ export class CollaborationSessionRepository {
     return this.collection.findOne({ _id: new ObjectId(id) });
   }
 
-  async findByRoomId(roomId) {
-    return this.collection.findOne({ roomId });
-  }
-
   async updateById(id, operations, options = {}) {
     if (!ObjectId.isValid(id)) {
       return null;
@@ -101,5 +88,14 @@ export class CollaborationSessionRepository {
       updatedAt: { $lt: expiryDate },
     });
     return result.deletedCount;
+  }
+
+  async getParticipantActiveSessions(userId) {
+    return await this.collection
+      .find({
+        status: "active",
+        "participants.userId": userId,
+      })
+      .toArray();
   }
 }

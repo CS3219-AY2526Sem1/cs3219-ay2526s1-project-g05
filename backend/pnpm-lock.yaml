@@ -21,18 +21,6 @@ importers:
         specifier: ^6.20.0
         version: 6.20.0
 
-  db_management:
-    dependencies:
-      argon2:
-        specifier: ^0.43.1
-        version: 0.43.1
-      dotenv:
-        specifier: ^17.2.2
-        version: 17.2.2
-      mongodb:
-        specifier: ^6.20.0
-        version: 6.20.0
-
   services/collaboration_service:
     dependencies:
       cors:

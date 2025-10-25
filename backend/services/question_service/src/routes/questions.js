@@ -19,7 +19,7 @@ export const use_question_routes = () => {
    * @return {object} 400 - Bad Request (e.g invalid topic or difficulty)
    * @security bearerAuth
    */
-  router.get("/", [authenticate], async (req, res) => {
+  router.get("/", [authenticate(false)], async (req, res) => {
     const { topic, difficulty, search } = req.query;
 
     const result = await retrieve_all_questions(topic, difficulty, search);
@@ -40,7 +40,7 @@ export const use_question_routes = () => {
    * @return {object} 400 - Bad Request (e.g invalid topic or difficulty)
    * @security bearerAuth
    */
-  router.get("/random", [authenticate], async (req, res) => {
+  router.get("/random", [authenticate(false)], async (req, res) => {
     const { topic } = req.query;
     const { difficulty } = req.query;
 
@@ -61,7 +61,7 @@ export const use_question_routes = () => {
    * @return {object} 404 - Question not found
    * @security bearerAuth
    */
-  router.get("/:id", [authenticate], async (req, res) => {
+  router.get("/:id", [authenticate(false)], async (req, res) => {
     const { id } = req.params;
     const result = await retrieve_question(id);
 

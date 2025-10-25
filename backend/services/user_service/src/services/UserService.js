@@ -20,8 +20,6 @@ export class UserService {
       failedLoginWindowStart,
       accountLocked,
       accountLockedAt,
-      pastCollaborationSessions,
-      collaborationSessionId,
       ...rest
     } = user;
     return {
@@ -99,21 +97,21 @@ export class UserService {
     return { user: sanitizedUser, token };
   }
 
-  async getUserById(id) {
-    const user = await this.repository.findById(id);
+  async getUserById(userId) {
+    const user = await this.repository.findById(userId);
     if (!user) {
       throw new ApiError(404, "User not found.");
     }
     return this.sanitizeUser(user);
   }
 
-  async updateUser(id, updates) {
+  async updateUser(userId, updates) {
     const { errors, sanitizedUpdates } = UserValidator.validateUpdate(updates);
     if (errors.length > 0) {
       throw new ApiError(400, "Validation failed.", errors);
     }
 
-    const currentUser = await this.repository.findById(id);
+    const currentUser = await this.repository.findById(userId);
     if (!currentUser) {
       throw new ApiError(404, "User not found.");
     }
@@ -150,7 +148,7 @@ export class UserService {
       delete updatePayload.password;
     }
 
-    const updatedUser = await this.repository.updateById(id, {
+    const updatedUser = await this.repository.updateById(userId, {
       set: updatePayload,
     });
     if (!updatedUser) {
@@ -159,8 +157,8 @@ export class UserService {
     return this.sanitizeUser(updatedUser);
   }
 
-  async deleteUser(id, password) {
-    const user = await this.repository.findById(id);
+  async deleteUser(userId, password) {
+    const user = await this.repository.findById(userId);
     if (!user) {
       throw new ApiError(404, "User not found.");
     }
@@ -177,7 +175,7 @@ export class UserService {
       throw new ApiError(401, "Invalid password.");
     }
 
-    const deleted = await this.repository.deleteById(id);
+    const deleted = await this.repository.deleteById(userId);
     if (!deleted) {
       throw new ApiError(500, "Failed to delete user.");
     }
@@ -243,5 +241,58 @@ export class UserService {
     });
 
     return this.sanitizeUser(updatedUser ?? user);
+  }
+
+  async addPastCollaborationSession(userId, sessionId) {
+    if (typeof sessionId !== "string" || sessionId.trim().length === 0) {
+      throw new ApiError(400, "A valid session ID is required.");
+    }
+
+    const normalizedSessionId = sessionId.trim();
+    const normalizedUserId = userId.trim();
+
+    const updatedUser = await this.repository.updateById(normalizedUserId, {
+      push: { pastCollaborationSessions: normalizedSessionId },
+    });
+
+    if (!updatedUser) {
+      throw new ApiError(404, "User not found.");
+    }
+
+    return this.sanitizeUser(updatedUser ?? user);
+  }
+  async updateCurrentCollaborationSession(userId, sessionId) {
+    if (sessionId !== null && typeof sessionId !== "string") {
+      throw new ApiError(400, "Session ID must be a string or null.");
+    }
+
+    const normalizedUserId = userId.trim();
+
+    if (sessionId === null) {
+      const updatedUser = await this.repository.updateById(normalizedUserId, {
+        set: { collaborationSessionId: null },
+      });
+
+      if (!updatedUser) {
+        throw new ApiError(404, "User not found.");
+      }
+
+      return this.sanitizeUser(updatedUser);
+    }
+
+    const normalizedSessionId = sessionId.trim();
+    if (normalizedSessionId.length === 0) {
+      throw new ApiError(400, "A valid session ID is required.");
+    }
+
+    const updatedUser = await this.repository.updateById(normalizedUserId, {
+      set: { collaborationSessionId: normalizedSessionId },
+    });
+
+    if (!updatedUser) {
+      throw new ApiError(404, "User not found.");
+    }
+
+    return this.sanitizeUser(updatedUser);
   }
 }

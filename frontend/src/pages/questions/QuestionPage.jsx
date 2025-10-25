@@ -14,7 +14,6 @@ export default function QuestionPage() {
     (async () => {
       try {
         const data = await getQuestions();
-        console.log("Fetched questions:", data);
         if (data?.length) setQuestions(data);
         else if (data?.questions?.length) setQuestions(data.questions);
       } catch (err) {
@@ -29,9 +28,12 @@ export default function QuestionPage() {
     <MainLayout>
       <div className="h-full flex-1 flex-col p-8 md:flex">
         <div className="mb-6 border-b pb-4">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Question Bank</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Question Bank
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Practice problems to prepare for interviews — filter by difficulty or topic.
+            Practice problems to prepare for interviews — filter by difficulty
+            or topic.
           </p>
         </div>
 
@@ -43,7 +45,8 @@ export default function QuestionPage() {
             columns={baseColumns}
             getRowProps={(row) => ({
               onClick: () => handleRowClick(row.original),
-              className: "cursor-pointer hover:bg-gray-50 transition duration-150",
+              className:
+                "cursor-pointer hover:bg-gray-50 transition duration-150",
             })}
           />
         )}

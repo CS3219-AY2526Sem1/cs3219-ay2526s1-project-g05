@@ -26,11 +26,20 @@ export class CollaborationApplication {
       return this.app;
     }
 
-    await MongoClientInstance.start();
-    const repository = await CollaborationSessionRepository.initialize(MongoClientInstance.db);
-    const collaborationService = new CollaborationSessionService({ repository });
+    await MongoClientInstance.start(
+      process.env.COLLABORATIONSERVICE_DB_USER,
+      process.env.COLLABORATIONSERVICE_DB_PASSWORD,
+    );
+    const repository = await CollaborationSessionRepository.initialize(
+      MongoClientInstance.db,
+    );
+    const collaborationService = new CollaborationSessionService({
+      repository,
+    });
     const controller = new CollaborationController(collaborationService);
-    const socketManager = new CollaborationSocketManager({ collaborationService });
+    const socketManager = new CollaborationSocketManager({
+      collaborationService,
+    });
 
     const app = express();
     app.enable("trust proxy");
@@ -39,14 +48,14 @@ export class CollaborationApplication {
       app.use(cors());
       console.log("CORS enabled for development");
     }
-    
+
     startSwaggerDocs(app, "Collaboration Service API", this.port);
 
     app.get("/status", (_req, res) => {
       res.json({ status: "Collaboration service is running" });
     });
 
-    app.use("/api/collaboration", createCollaborationRouter(controller));
+    app.use("/", createCollaborationRouter(controller));
     app.use(errorMiddleware);
 
     this.app = app;

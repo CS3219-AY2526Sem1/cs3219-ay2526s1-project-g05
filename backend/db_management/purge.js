@@ -12,6 +12,18 @@ const run = async () => {
     console.info(`Collection ${collection.name} dropped.`);
   }
 
+  // Drop users created in this DB
+  const usersInfo = await db.command({ usersInfo: 1 });
+  for (const u of usersInfo.users ?? []) {
+    await db.command({ dropUser: u.user });
+  }
+
+  // Drop *custom* roles created in this DB (skip built-ins)
+  const rolesInfo = await db.command({ rolesInfo: 1, showBuiltinRoles: false });
+  for (const r of rolesInfo.roles ?? []) {
+    await db.command({ dropRole: r.role });
+  }
+
   MongoClientInstance.close();
   return true;
 };

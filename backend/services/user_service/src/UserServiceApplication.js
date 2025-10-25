@@ -21,7 +21,10 @@ export class UserServiceApplication {
       return this.app;
     }
 
-    await MongoClientInstance.start();
+    await MongoClientInstance.start(
+      process.env.USERSERVICE_DB_USER,
+      process.env.USERSERVICE_DB_PASSWORD,
+    );
     const repository = await UserRepository.initialize(MongoClientInstance.db);
     const passwordHasher = new PasswordHasher();
     const userService = new UserService({ repository, passwordHasher });
@@ -29,17 +32,17 @@ export class UserServiceApplication {
 
     const app = express();
     app.use(express.json());
-    
+
     if (process.env.NODE_ENV === "development") {
-        app.use(cors());
-        console.log("CORS enabled for development");
+      app.use(cors());
+      console.log("CORS enabled for development");
     }
 
     app.get("/status", (_req, res) => {
       res.json({ status: "User service is running" });
     });
 
-    app.use("/users", createUserRouter(controller));
+    app.use("/", createUserRouter(controller));
 
     app.use(errorMiddleware);
 

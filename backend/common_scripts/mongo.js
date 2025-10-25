@@ -9,14 +9,16 @@ export class MongoClientInstance {
   static client = null;
   static db = null;
 
-  static start = async () => {
+  static start = async (username = null, password = null) => {
     if (MongoClientInstance.client) {
       console.info("Mongo client already connected");
       return MongoClientInstance.client;
     }
     try {
+      const combinedUserPass =
+        username && password ? `${username}:${password}@` : "";
       const clientResponse = await MongoDB.MongoClient.connect(
-        "mongodb://localhost:27017",
+        `mongodb://${combinedUserPass}localhost:27017/?authSource=${process.env.MONGO_DB_NAME}`,
       );
       console.info("Connected to MongoDB successfully");
       MongoClientInstance.client = clientResponse;

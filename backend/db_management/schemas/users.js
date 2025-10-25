@@ -79,3 +79,8 @@ export const users_indexes = [
   { key: { username: 1 }, options: { unique: true, name: "username_index" } },
   { key: { email: 1 }, options: { unique: true, name: "email_index" } },
 ];
+
+export const users_user = {
+  username: process.env.USERSERVICE_DB_USER,
+  password: process.env.USERSERVICE_DB_PASSWORD,
+};

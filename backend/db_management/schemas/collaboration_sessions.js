@@ -3,7 +3,6 @@ export const collaboration_sessions_schema = {
     $jsonSchema: {
       bsonType: "object",
       required: [
-        "roomId",
         "language",
         "questionId",
         "code",
@@ -21,8 +20,6 @@ export const collaboration_sessions_schema = {
       additionalProperties: false,
       properties: {
         _id: { bsonType: "objectId" },
-
-        roomId: { bsonType: "string", minLength: 1 },
 
         language: {
           bsonType: "string",
@@ -58,8 +55,8 @@ export const collaboration_sessions_schema = {
               userId: { bsonType: "string", minLength: 1 },
               displayName: { bsonType: "string", minLength: 1 },
               connected: { bsonType: "bool" },
-              joinedAt: { bsonType: "date" },
-              lastSeenAt: { bsonType: "date" },
+              joinedAt: { bsonType: ["date", "null"] },
+              lastSeenAt: { bsonType: ["date", "null"] },
               disconnectedAt: { bsonType: ["date", "null"] },
               reconnectBy: { bsonType: ["date", "null"] },
               endConfirmed: { bsonType: "bool" },
@@ -102,3 +99,8 @@ export const collaboration_sessions_indexes = [
     options: { name: "participants.userId_index" },
   },
 ];
+
+export const collaboration_sessions_user = {
+  username: process.env.COLLABORATIONSERVICE_DB_USER,
+  password: process.env.COLLABORATIONSERVICE_DB_PASSWORD,
+};

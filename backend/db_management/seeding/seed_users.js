@@ -7,6 +7,11 @@ const USER_DOCUMENTS = [
     email: "test1@mail.com",
     password: "Testing123!",
   },
+  {
+    username: "test2",
+    email: "test2@mail.com",
+    password: "Testing123!",
+  },
 ];
 
 export const seed_user = async (user) => {
