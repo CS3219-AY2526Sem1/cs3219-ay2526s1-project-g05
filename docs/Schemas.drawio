@@ -1,0 +1,65 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="28.2.8">
+  <diagram name="Page-1" id="efa7a0a1-bf9b-a30e-e6df-94a7791c09e9">
+    <mxGraphModel dx="716" dy="922" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="826" pageHeight="1169" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="25" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;strong&gt;users&lt;/strong&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;_id&lt;/td&gt;&lt;td&gt;ObjectId&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;username:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;email:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;passwordHash:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;createdAt:&lt;/td&gt;&lt;td&gt;date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;updatedAt:&lt;/td&gt;&lt;td&gt;date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;failedLoginAttempts:&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;failedLoginWindowStart:&lt;/td&gt;&lt;td&gt;date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;accountLocked&lt;/td&gt;&lt;td&gt;bool&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;accountLockedAt&lt;/td&gt;&lt;td&gt;date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;collaborationSessionId&lt;/td&gt;&lt;td&gt;string | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;pastCollaborationSessions&lt;/td&gt;&lt;td&gt;string[]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;codeRunnerServiceUsage&lt;/td&gt;&lt;td&gt;string | null&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#003366;shadow=1;fillColor=#D4E1F5;fontColor=#003366" parent="1" vertex="1">
+          <mxGeometry x="40" y="21.64" width="230" height="278.36" as="geometry" />
+        </mxCell>
+        <mxCell id="1bCQR22PjD4e2PDbR59C-114" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;b&gt;questions&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;_id&lt;/td&gt;&lt;td&gt;ObjectId&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;QID:&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;title:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;titleSlug:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;difficulty:&lt;/td&gt;&lt;td&gt;enum[&quot;Easy&quot;, &quot;Medium&quot;, &quot;Hard&quot;]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;hints:&lt;/td&gt;&lt;td&gt;string[]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;companies:&lt;/td&gt;&lt;td&gt;string[] | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;topics:&lt;/td&gt;&lt;td&gt;string[]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;body&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;code&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;similarQuestions&lt;/td&gt;&lt;td&gt;int[]&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#003366;shadow=1;fillColor=#D4E1F5;fontColor=#003366" parent="1" vertex="1">
+          <mxGeometry x="360" y="21.64" width="290" height="258.36" as="geometry" />
+        </mxCell>
+        <mxCell id="1bCQR22PjD4e2PDbR59C-115" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;b&gt;collaboration_sessions&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;_id&lt;/td&gt;&lt;td&gt;ObjectId&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;language:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;questionId:&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;code:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;version:&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;status:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;participants:&lt;/td&gt;&lt;td&gt;ParticipantObject&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;pendingQuestionChange:&lt;/td&gt;&lt;td&gt;PendingQChange&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;endRequests&lt;/td&gt;&lt;td&gt;string[]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;cursorPositions&lt;/td&gt;&lt;td&gt;CursorPositionObject[]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;lastOperation&lt;/td&gt;&lt;td&gt;LastOperation | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;lastConflictAt&lt;/td&gt;&lt;td&gt;Date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;createdAt&lt;/td&gt;&lt;td&gt;Date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;updatedAt&lt;/td&gt;&lt;td&gt;Date&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#003366;shadow=1;fillColor=#D4E1F5;fontColor=#003366" parent="1" vertex="1">
+          <mxGeometry x="200" y="310" width="290" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="1bCQR22PjD4e2PDbR59C-118" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.724;exitY=0.503;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" edge="1" target="1bCQR22PjD4e2PDbR59C-120">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="550" y="462" as="targetPoint" />
+            <mxPoint x="440" y="461.77507999999995" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="1bCQR22PjD4e2PDbR59C-120" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;b&gt;ParticipantObject&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;userId&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;displayName:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;connected:&lt;/td&gt;&lt;td&gt;bool&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;joinedAt:&lt;/td&gt;&lt;td&gt;date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;lastSeenAt:&lt;/td&gt;&lt;td&gt;date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;disconnectedAt:&lt;/td&gt;&lt;td&gt;date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;reconnectBy:&lt;/td&gt;&lt;td&gt;date | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;endConfirmed&lt;/td&gt;&lt;td&gt;bool&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#82b366;shadow=1;fillColor=#d5e8d4;" parent="1" vertex="1">
+          <mxGeometry x="610" y="290" width="170" height="184" as="geometry" />
+        </mxCell>
+        <mxCell id="YsX8oNUK8y1LRUXY8mbB-25" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;b&gt;PendingQChange&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;questionId&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;proposedBy:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;rationale:&lt;/td&gt;&lt;td&gt;string | null&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;approvals:&lt;/td&gt;&lt;td&gt;sring[]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;createdAt:&lt;/td&gt;&lt;td&gt;date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#82b366;shadow=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="610" y="490" width="170" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="YsX8oNUK8y1LRUXY8mbB-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.002;entryY=0.569;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="YsX8oNUK8y1LRUXY8mbB-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="620" y="400" as="targetPoint" />
+            <mxPoint x="440" y="480" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YsX8oNUK8y1LRUXY8mbB-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="YsX8oNUK8y1LRUXY8mbB-28">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="470" y="680" as="targetPoint" />
+            <mxPoint x="470" y="520" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="510" y="520" />
+              <mxPoint x="510" y="615" />
+              <mxPoint x="540" y="615" />
+              <mxPoint x="540" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YsX8oNUK8y1LRUXY8mbB-28" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;b&gt;CursorPositionObject&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;line&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;ch:&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;updatedAt:&lt;/td&gt;&lt;td&gt;date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#82b366;shadow=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="610" y="630" width="170" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="YsX8oNUK8y1LRUXY8mbB-29" value="&lt;p style=&quot;margin: 0px; margin-top: 4px; text-align: center; text-decoration: underline;&quot;&gt;&lt;b&gt;LastOperationObject&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;table style=&quot;background-color: transparent; color: light-dark(rgb(0, 51, 102), rgb(161, 205, 249));&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;userId&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;type:&lt;/td&gt;&lt;td&gt;string&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;version:&lt;/td&gt;&lt;td&gt;int&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;timestamp&lt;/td&gt;&lt;td&gt;date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;conflict&lt;/td&gt;&lt;td&gt;bool&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;br&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;br&gt;&lt;p&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;strokeColor=#82b366;shadow=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="390" y="690" width="170" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="YsX8oNUK8y1LRUXY8mbB-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="690" as="targetPoint" />
+            <mxPoint x="460" y="536" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="480" y="536" />
+              <mxPoint x="480" y="690" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
