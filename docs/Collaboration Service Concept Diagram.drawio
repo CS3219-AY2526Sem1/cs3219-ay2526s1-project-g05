@@ -1,0 +1,110 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="28.2.9">
+  <diagram name="Page-1" id="kqEywrsNWKGvs-uM4alM">
+    <mxGraphModel dx="946" dy="597" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CnUCi482Yy8wwbmsKE80-2" value="Collaboration Service (Node.js)" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="390" y="120" width="490" height="280" as="geometry">
+            <mxRectangle x="390" y="120" width="210" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="CnUCi482Yy8wwbmsKE80-2" source="CnUCi482Yy8wwbmsKE80-7" target="CnUCi482Yy8wwbmsKE80-13" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-7" value="Express Router and Controller" style="rounded=0;whiteSpace=wrap;html=1;" parent="CnUCi482Yy8wwbmsKE80-2" vertex="1">
+          <mxGeometry x="31.5" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="CnUCi482Yy8wwbmsKE80-2" source="CnUCi482Yy8wwbmsKE80-13" target="CnUCi482Yy8wwbmsKE80-17" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="CnUCi482Yy8wwbmsKE80-2" source="CnUCi482Yy8wwbmsKE80-13" target="CnUCi482Yy8wwbmsKE80-19" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-13" value="Collaboration Session Service" style="whiteSpace=wrap;html=1;rounded=0;" parent="CnUCi482Yy8wwbmsKE80-2" vertex="1">
+          <mxGeometry x="181.5" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-17" value="Collaboration Session Repository" style="whiteSpace=wrap;html=1;rounded=0;" parent="CnUCi482Yy8wwbmsKE80-2" vertex="1">
+          <mxGeometry x="338.5" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-19" value="Socket.IO Manager" style="rounded=0;whiteSpace=wrap;html=1;" parent="CnUCi482Yy8wwbmsKE80-2" vertex="1">
+          <mxGeometry x="181.5" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-8" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="CnUCi482Yy8wwbmsKE80-6" target="CnUCi482Yy8wwbmsKE80-7" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="330" y="270" as="sourcePoint" />
+            <mxPoint x="380" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-10" value="REST API&lt;br&gt;(E.g. Create collaboration session etc)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CnUCi482Yy8wwbmsKE80-8" vertex="1" connectable="0">
+          <mxGeometry x="0.0604" relative="1" as="geometry">
+            <mxPoint x="-3" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-23" value="MongoDB collaboration_sessions&lt;div&gt;Collection&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="910" y="290" width="140" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="CnUCi482Yy8wwbmsKE80-17" target="CnUCi482Yy8wwbmsKE80-23" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="890" y="330" />
+              <mxPoint x="890" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-6" value="Matching Service" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="80" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-5" value="Client Browser" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="80" y="160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-35" value="User Service" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="80" y="420" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="CnUCi482Yy8wwbmsKE80-13" target="CnUCi482Yy8wwbmsKE80-35" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="440" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="632" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-37" value="REST API&lt;div&gt;(E.g.&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;Update user&#39;s current collaboration session,&lt;/span&gt;&lt;/div&gt;&lt;div&gt;Update user&#39;s collaboration session history etc)&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CnUCi482Yy8wwbmsKE80-36" vertex="1" connectable="0">
+          <mxGeometry x="0.1696" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-39" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="CnUCi482Yy8wwbmsKE80-5" target="CnUCi482Yy8wwbmsKE80-19" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="300" as="sourcePoint" />
+            <mxPoint x="570" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CnUCi482Yy8wwbmsKE80-40" value="WebSocket Events&amp;nbsp;&lt;div&gt;(E.g. Operations, updates, reconnections etc)&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CnUCi482Yy8wwbmsKE80-39" vertex="1" connectable="0">
+          <mxGeometry x="-0.0065" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w3ooH-zhOYz8Y9Y3hj9E-2" value="Redis" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="910" y="180" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="w3ooH-zhOYz8Y9Y3hj9E-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="CnUCi482Yy8wwbmsKE80-17" target="w3ooH-zhOYz8Y9Y3hj9E-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="890" y="330" />
+              <mxPoint x="890" y="225" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w3ooH-zhOYz8Y9Y3hj9E-6" value="OpenAI API (External)" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="660" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="w3ooH-zhOYz8Y9Y3hj9E-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="CnUCi482Yy8wwbmsKE80-13" target="w3ooH-zhOYz8Y9Y3hj9E-6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="662" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
