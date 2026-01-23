@@ -45,7 +45,7 @@
     "cmdk": "^1.1.1",
     "codemirror": "^6.0.2",
     "fs": "0.0.1-security",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "lucide-react": "^0.544.0",
     "path": "^0.12.7",
     "react": "^19.1.1",
